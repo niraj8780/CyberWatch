@@ -1,0 +1,323 @@
+import React from 'react';
+import { useApi } from '../hooks/useApi';
+import { getNetworkStats, getConnections, getHealth } from '../services/api';
+import KPICard from '../components/KPICard';
+import ConnectionTable from '../components/ConnectionTable';
+import ErrorState from '../components/ErrorState';
+import {
+  Network,
+  Server,
+  Radio,
+  Ear,
+  Link2,
+  Activity,
+  BarChart3,
+  PieChart as PieChartIcon,
+  RefreshCw,
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+
+export const Overview: React.FC = () => {
+  // Fetch network stats every 5s
+  const {
+    data: stats,
+    loading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useApi(getNetworkStats, 5000);
+
+  // Fetch recent connections every 5s
+  const {
+    data: connData,
+    loading: connLoading,
+    error: connError,
+    refetch: refetchConnections,
+  } = useApi(() => getConnections({ limit: 20 }), 5000);
+
+  // Fetch health status
+  const {
+    data: health,
+    loading: healthLoading,
+    refetch: refetchHealth,
+  } = useApi(getHealth, 10000);
+
+  const handleRefreshAll = () => {
+    refetchStats();
+    refetchConnections();
+    refetchHealth();
+  };
+
+  const hasFatalError = Boolean(statsError && connError);
+
+  // Prepare Bar Chart data from states dict
+  const stateChartData = React.useMemo(() => {
+    if (!stats?.states) return [];
+    return Object.entries(stats.states).map(([state, count]) => ({
+      name: state,
+      count: count,
+    })).sort((a, b) => b.count - a.count);
+  }, [stats]);
+
+  // Prepare Pie Chart data (TCP vs UDP)
+  const protocolData = React.useMemo(() => {
+    if (!stats) return [];
+    return [
+      { name: 'TCP', value: stats.tcp_connections || 0, color: '#3b82f6' },
+      { name: 'UDP', value: stats.udp_connections || 0, color: '#a855f7' },
+    ].filter((item) => item.value > 0);
+  }, [stats]);
+
+  const barColors = ['#06b6d4', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'];
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#2d3548]">
+        <div>
+          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
+            <Activity className="h-5 w-5 text-cyan-400" />
+            Security Overview Dashboard
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Real-time socket metrics, transport protocol distribution, and latest active streams.
+          </p>
+        </div>
+
+        <button
+          onClick={handleRefreshAll}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200 self-start sm:self-auto"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Refresh
+        </button>
+      </div>
+
+      {/* Error state if backend completely down */}
+      {hasFatalError && (
+        <ErrorState
+          message={`Unable to connect to backend telemetry service: ${statsError || connError}`}
+          onRetry={handleRefreshAll}
+        />
+      )}
+
+      {/* Top Row: 6 KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {/* Total Connections */}
+        <KPICard
+          title="Total Sockets"
+          value={stats?.total_connections ?? '—'}
+          subtitle="All active sockets"
+          icon={Network}
+          color="cyan"
+          loading={statsLoading}
+        />
+
+        {/* TCP Connections */}
+        <KPICard
+          title="TCP Connections"
+          value={stats?.tcp_connections ?? '—'}
+          subtitle="Stream oriented"
+          icon={Server}
+          color="blue"
+          loading={statsLoading}
+        />
+
+        {/* UDP Sockets */}
+        <KPICard
+          title="UDP Sockets"
+          value={stats?.udp_connections ?? '—'}
+          subtitle="Datagram oriented"
+          icon={Radio}
+          color="purple"
+          loading={statsLoading}
+        />
+
+        {/* Listening Ports */}
+        <KPICard
+          title="Listening Ports"
+          value={stats?.listening_ports ?? '—'}
+          subtitle="Inbound listeners"
+          icon={Ear}
+          color="emerald"
+          loading={statsLoading}
+        />
+
+        {/* Established */}
+        <KPICard
+          title="Established"
+          value={stats?.established ?? '—'}
+          subtitle="Active handshakes"
+          icon={Link2}
+          color="emerald"
+          loading={statsLoading}
+        />
+
+        {/* Monitoring Status */}
+        <KPICard
+          title="Daemon Sensor"
+          value={
+            health?.monitoring_active
+              ? 'ACTIVE'
+              : health?.status === 'healthy'
+              ? 'ONLINE'
+              : 'OFFLINE'
+          }
+          subtitle="Continuous sniffing"
+          icon={Activity}
+          color={health?.monitoring_active || health?.status === 'healthy' ? 'cyan' : 'red'}
+          loading={healthLoading}
+        />
+      </div>
+
+      {/* Middle Row: Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Bar Chart: Connection States */}
+        <div className="lg:col-span-2 bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
+          <div className="flex items-center justify-between mb-4 border-b border-[#2d3548] pb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-cyan-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+                Connection State Breakdown
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">States count</span>
+          </div>
+
+          <div className="h-64 w-full">
+            {statsLoading ? (
+              <div className="h-full w-full flex items-center justify-center bg-[#111827]/40 rounded-lg animate-pulse">
+                <span className="text-xs text-slate-500">Loading metrics...</span>
+              </div>
+            ) : stateChartData.length === 0 ? (
+              <div className="h-full w-full flex items-center justify-center text-xs text-slate-500">
+                No connection state telemetry recorded
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stateChartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                  <XAxis
+                    dataKey="name"
+                    stroke="#64748b"
+                    fontSize={10}
+                    tickLine={false}
+                    interval={0}
+                    angle={-25}
+                    textAnchor="end"
+                  />
+                  <YAxis stroke="#64748b" fontSize={10} tickLine={false} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#111827',
+                      borderColor: '#2d3548',
+                      borderRadius: '0.5rem',
+                      fontSize: '12px',
+                      color: '#f8fafc',
+                    }}
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                  />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {stateChartData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={barColors[index % barColors.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Pie Chart: Protocol Distribution */}
+        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
+          <div className="flex items-center justify-between mb-4 border-b border-[#2d3548] pb-3">
+            <div className="flex items-center gap-2">
+              <PieChartIcon className="h-4 w-4 text-cyan-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+                Transport Protocol Share
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">TCP / UDP</span>
+          </div>
+
+          <div className="h-64 w-full flex items-center justify-center">
+            {statsLoading ? (
+              <div className="h-full w-full flex items-center justify-center bg-[#111827]/40 rounded-lg animate-pulse">
+                <span className="text-xs text-slate-500">Calculating proportions...</span>
+              </div>
+            ) : protocolData.length === 0 ? (
+              <div className="h-full w-full flex items-center justify-center text-xs text-slate-500">
+                No protocol data available
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={protocolData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    labelLine={false}
+                    fontSize={11}
+                  >
+                    {protocolData.map((entry, index) => (
+                      <Cell key={`slice-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#111827',
+                      borderColor: '#2d3548',
+                      borderRadius: '0.5rem',
+                      fontSize: '12px',
+                      color: '#f8fafc',
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Recent Connections Table */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+            <Network className="h-4 w-4 text-cyan-400" />
+            Active Connections (Last 20)
+          </h2>
+          <span className="text-xs text-slate-400 font-mono">
+            Auto-refreshing every 5s
+          </span>
+        </div>
+
+        <ConnectionTable
+          connections={connData?.connections || []}
+          loading={connLoading}
+          total={connData?.total}
+          showPagination={false}
+          emptyTitle="No recent connections"
+          emptyDescription="Waiting for network telemetry packets from daemon."
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Overview;
