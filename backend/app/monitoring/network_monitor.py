@@ -4,17 +4,19 @@ import asyncio
 from datetime import datetime, timezone
 import socket
 from typing import Any
+from uuid import uuid4
 
 import psutil
 import structlog
 
 from app.config import get_settings
+from app.websockets.manager import ws_manager
 
 logger = structlog.get_logger(__name__)
 
 
 class NetworkMonitor:
-    """Collects real network connection data using psutil."""
+    """Collects real network connection data using psutil with delta tracking and live broadcasting."""
 
     def __init__(self, interval: float | None = None, max_history: int | None = None) -> None:
         settings = get_settings()
@@ -22,6 +24,9 @@ class NetworkMonitor:
         self._max_history = max_history if max_history is not None else settings.MAX_CONNECTIONS_HISTORY
         self._running = False
         self._connections: list[dict[str, Any]] = []
+        self._previous_conn_map: dict[str, dict[str, Any]] = {}
+        self._recent_events: list[dict[str, Any]] = []
+        self._max_events: int = 100
         self._last_scan_time: datetime | None = None
         self._lock = asyncio.Lock()
         self._task: asyncio.Task[None] | None = None
@@ -43,7 +48,6 @@ class NetworkMonitor:
 
         self._running = True
         logger.info("starting_network_monitor", interval=self._interval)
-        # Perform an initial collection synchronously in executor so connections are immediately populated
         try:
             await self._collect_connections()
         except Exception as e:
@@ -76,14 +80,122 @@ class NetworkMonitor:
             except Exception as e:
                 logger.error("network_monitor_loop_iteration_failed", error=str(e))
 
+    def _connection_key(self, conn: dict[str, Any]) -> str:
+        """Generate a unique fingerprint for a connection instance."""
+        proto = conn.get("protocol", "tcp")
+        lip = conn.get("local_ip") or "*"
+        lport = conn.get("local_port") or 0
+        rip = conn.get("remote_ip") or "*"
+        rport = conn.get("remote_port") or 0
+        pid = conn.get("pid") or 0
+        return f"{proto}|{lip}:{lport}|{rip}:{rport}|{pid}"
+
     async def _collect_connections(self) -> None:
-        """Collect all active network connections asynchronously via thread executor."""
+        """Collect all active network connections asynchronously and compute delta changes."""
         loop = asyncio.get_running_loop()
         connections = await loop.run_in_executor(None, self._get_connections_sync)
+        now_dt = datetime.now(timezone.utc)
+        now_iso = now_dt.isoformat()
+
+        # Build map of current connections
+        current_map: dict[str, dict[str, Any]] = {}
+        for conn in connections:
+            key = self._connection_key(conn)
+            current_map[key] = conn
+
+        new_events: list[dict[str, Any]] = []
+        new_conns_list: list[dict[str, Any]] = []
+        closed_conns_list: list[dict[str, Any]] = []
+
+        # If we have a prior scan, detect differences (delta)
+        if self._previous_conn_map:
+            current_keys = set(current_map.keys())
+            prev_keys = set(self._previous_conn_map.keys())
+
+            new_keys = current_keys - prev_keys
+            closed_keys = prev_keys - current_keys
+
+            for k in new_keys:
+                c = current_map[k]
+                new_conns_list.append(c)
+                new_events.append(
+                    {
+                        "id": f"evt-{uuid4().hex[:8]}",
+                        "event_type": "CONNECTED",
+                        "protocol": c.get("protocol", "tcp").upper(),
+                        "local_address": f"{c.get('local_ip')}:{c.get('local_port')}",
+                        "remote_address": (
+                            f"{c.get('remote_ip')}:{c.get('remote_port')}"
+                            if c.get("remote_ip")
+                            else None
+                        ),
+                        "process_name": c.get("process_name") or "Unknown",
+                        "pid": c.get("pid"),
+                        "status": c.get("status", "NONE"),
+                        "timestamp": now_iso,
+                    }
+                )
+
+            for k in closed_keys:
+                c = self._previous_conn_map[k]
+                closed_conns_list.append(c)
+                new_events.append(
+                    {
+                        "id": f"evt-{uuid4().hex[:8]}",
+                        "event_type": "DISCONNECTED",
+                        "protocol": c.get("protocol", "tcp").upper(),
+                        "local_address": f"{c.get('local_ip')}:{c.get('local_port')}",
+                        "remote_address": (
+                            f"{c.get('remote_ip')}:{c.get('remote_port')}"
+                            if c.get("remote_ip")
+                            else None
+                        ),
+                        "process_name": c.get("process_name") or "Unknown",
+                        "pid": c.get("pid"),
+                        "status": "CLOSED",
+                        "timestamp": now_iso,
+                    }
+                )
+
         async with self._lock:
             self._connections = connections[: self._max_history]
-            self._last_scan_time = datetime.now(timezone.utc)
-        logger.debug("network_connections_collected", count=len(connections))
+            self._previous_conn_map = current_map
+            self._last_scan_time = now_dt
+            if new_events:
+                # Prepend newer events and cap ring buffer
+                self._recent_events = (new_events + self._recent_events)[: self._max_events]
+
+        logger.debug(
+            "network_connections_collected",
+            count=len(connections),
+            new_conns=len(new_conns_list),
+            closed_conns=len(closed_conns_list),
+        )
+
+        # Broadcast live update to all active WebSocket clients if any are connected
+        if ws_manager.active_connections_count > 0:
+            stats = await self.get_statistics()
+            broadcast_msg = {
+                "type": "update",
+                "timestamp": now_iso,
+                "data": {
+                    "statistics": stats,
+                    "delta": {
+                        "new_count": len(new_conns_list),
+                        "closed_count": len(closed_conns_list),
+                        "new": new_conns_list[:10],
+                        "closed": closed_conns_list[:10],
+                    },
+                    "recent_events": self._recent_events[:15],
+                    "connections_sample": connections[:25],
+                },
+            }
+            await ws_manager.broadcast(broadcast_msg)
+
+    async def get_recent_events(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Return the most recent connection and disconnection events."""
+        async with self._lock:
+            return list(self._recent_events[:limit])
 
     def _get_connections_sync(self) -> list[dict[str, Any]]:
         """Synchronous connection collection with full error and permission handling."""
@@ -116,7 +228,6 @@ class NetworkMonitor:
 
     def _parse_connection(self, conn: Any) -> dict[str, Any] | None:
         """Parse a single psutil connection into a standardized dictionary."""
-        # Extract local address (handle empty, tuple, or namedtuple)
         local_ip: str | None = None
         local_port: int | None = None
         if conn.laddr:
@@ -127,7 +238,6 @@ class NetworkMonitor:
                 local_ip = str(conn.laddr[0])
                 local_port = int(conn.laddr[1])
 
-        # Extract remote address (handle empty for listening/UDP)
         remote_ip: str | None = None
         remote_port: int | None = None
         if conn.raddr:
@@ -138,18 +248,13 @@ class NetworkMonitor:
                 remote_ip = str(conn.raddr[0])
                 remote_port = int(conn.raddr[1])
 
-        # Determine protocol
         protocol = "tcp" if getattr(conn, "type", None) == socket.SOCK_STREAM else "udp"
-
-        # Determine IP version
         ip_version = "IPv6" if getattr(conn, "family", None) == socket.AF_INET6 else "IPv4"
 
-        # Extract status safely
         status = getattr(conn, "status", "NONE")
         if not status:
             status = "NONE"
 
-        # Get process info safely
         process_name: str | None = None
         process_pid: int | None = getattr(conn, "pid", None)
         if process_pid:

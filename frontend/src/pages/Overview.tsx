@@ -1,8 +1,10 @@
 import React from 'react';
 import { useApi } from '../hooks/useApi';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { getNetworkStats, getConnections, getHealth } from '../services/api';
 import KPICard from '../components/KPICard';
 import ConnectionTable from '../components/ConnectionTable';
+import LiveEventFeed from '../components/LiveEventFeed';
 import ErrorState from '../components/ErrorState';
 import {
   Network,
@@ -14,6 +16,8 @@ import {
   BarChart3,
   PieChart as PieChartIcon,
   RefreshCw,
+  Pause,
+  Play,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,21 +32,32 @@ import {
 } from 'recharts';
 
 export const Overview: React.FC = () => {
-  // Fetch network stats every 5s
+  // Real-time WebSocket live updates
   const {
-    data: stats,
+    isLive,
+    statistics: wsStats,
+    recentEvents: wsEvents,
+    recentConnections: wsConns,
+    deltaStats,
+    isPaused,
+    togglePause,
+  } = useWebSocket();
+
+  // HTTP polling fallback every 5s if WebSocket is offline or initial load
+  const {
+    data: httpStats,
     loading: statsLoading,
     error: statsError,
     refetch: refetchStats,
-  } = useApi(getNetworkStats, 5000);
+  } = useApi(getNetworkStats, isLive ? undefined : 5000);
 
-  // Fetch recent connections every 5s
+  // Fetch recent connections
   const {
     data: connData,
     loading: connLoading,
     error: connError,
     refetch: refetchConnections,
-  } = useApi(() => getConnections({ limit: 20 }), 5000);
+  } = useApi(() => getConnections({ limit: 20 }), isLive ? undefined : 5000);
 
   // Fetch health status
   const {
@@ -51,31 +66,37 @@ export const Overview: React.FC = () => {
     refetch: refetchHealth,
   } = useApi(getHealth, 10000);
 
+  // Prioritize WebSocket live stats over HTTP polled stats
+  const activeStats = wsStats || httpStats;
+  const activeConnections = wsConns.length > 0 ? wsConns : connData?.connections || [];
+
   const handleRefreshAll = () => {
     refetchStats();
     refetchConnections();
     refetchHealth();
   };
 
-  const hasFatalError = Boolean(statsError && connError);
+  const hasFatalError = Boolean(statsError && connError && !isLive);
 
   // Prepare Bar Chart data from states dict
   const stateChartData = React.useMemo(() => {
-    if (!stats?.states) return [];
-    return Object.entries(stats.states).map(([state, count]) => ({
-      name: state,
-      count: count,
-    })).sort((a, b) => b.count - a.count);
-  }, [stats]);
+    if (!activeStats?.states) return [];
+    return Object.entries(activeStats.states)
+      .map(([state, count]) => ({
+        name: state,
+        count: count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [activeStats]);
 
   // Prepare Pie Chart data (TCP vs UDP)
   const protocolData = React.useMemo(() => {
-    if (!stats) return [];
+    if (!activeStats) return [];
     return [
-      { name: 'TCP', value: stats.tcp_connections || 0, color: '#3b82f6' },
-      { name: 'UDP', value: stats.udp_connections || 0, color: '#a855f7' },
+      { name: 'TCP', value: activeStats.tcp_connections || 0, color: '#3b82f6' },
+      { name: 'UDP', value: activeStats.udp_connections || 0, color: '#a855f7' },
     ].filter((item) => item.value > 0);
-  }, [stats]);
+  }, [activeStats]);
 
   const barColors = ['#06b6d4', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'];
 
@@ -89,20 +110,46 @@ export const Overview: React.FC = () => {
             Security Overview Dashboard
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time socket metrics, transport protocol distribution, and latest active streams.
+            Real-time socket metrics, bidirectional WebSocket telemetry, and live connection stream.
           </p>
         </div>
 
-        <button
-          onClick={handleRefreshAll}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200 self-start sm:self-auto"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2.5">
+          {/* Pause / Play Live Stream Button */}
+          {isLive && (
+            <button
+              onClick={togglePause}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 ${
+                isPaused
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
+                  : 'bg-[#1e2538] text-slate-300 border-[#2d3548] hover:text-white hover:border-cyan-500/50'
+              }`}
+            >
+              {isPaused ? (
+                <>
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  Resume Live
+                </>
+              ) : (
+                <>
+                  <Pause className="h-3.5 w-3.5" />
+                  Pause Stream
+                </>
+              )}
+            </button>
+          )}
+
+          <button
+            onClick={handleRefreshAll}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200 self-start sm:self-auto"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
+          </button>
+        </div>
       </div>
 
-      {/* Error state if backend completely down */}
+      {/* Error state if backend completely down and no WS */}
       {hasFatalError && (
         <ErrorState
           message={`Unable to connect to backend telemetry service: ${statsError || connError}`}
@@ -115,74 +162,76 @@ export const Overview: React.FC = () => {
         {/* Total Connections */}
         <KPICard
           title="Total Sockets"
-          value={stats?.total_connections ?? '—'}
-          subtitle="All active sockets"
+          value={activeStats?.total_connections ?? '—'}
+          subtitle={isLive ? 'Live via WebSocket' : 'All active sockets'}
           icon={Network}
           color="cyan"
-          loading={statsLoading}
+          loading={statsLoading && !activeStats}
         />
 
         {/* TCP Connections */}
         <KPICard
           title="TCP Connections"
-          value={stats?.tcp_connections ?? '—'}
+          value={activeStats?.tcp_connections ?? '—'}
           subtitle="Stream oriented"
           icon={Server}
           color="blue"
-          loading={statsLoading}
+          loading={statsLoading && !activeStats}
         />
 
         {/* UDP Sockets */}
         <KPICard
           title="UDP Sockets"
-          value={stats?.udp_connections ?? '—'}
+          value={activeStats?.udp_connections ?? '—'}
           subtitle="Datagram oriented"
           icon={Radio}
           color="purple"
-          loading={statsLoading}
+          loading={statsLoading && !activeStats}
         />
 
         {/* Listening Ports */}
         <KPICard
           title="Listening Ports"
-          value={stats?.listening_ports ?? '—'}
+          value={activeStats?.listening_ports ?? '—'}
           subtitle="Inbound listeners"
           icon={Ear}
           color="emerald"
-          loading={statsLoading}
+          loading={statsLoading && !activeStats}
         />
 
         {/* Established */}
         <KPICard
           title="Established"
-          value={stats?.established ?? '—'}
+          value={activeStats?.established ?? '—'}
           subtitle="Active handshakes"
           icon={Link2}
           color="emerald"
-          loading={statsLoading}
+          loading={statsLoading && !activeStats}
         />
 
         {/* Monitoring Status */}
         <KPICard
           title="Daemon Sensor"
           value={
-            health?.monitoring_active
+            isLive
+              ? 'STREAMING'
+              : health?.monitoring_active
               ? 'ACTIVE'
               : health?.status === 'healthy'
               ? 'ONLINE'
               : 'OFFLINE'
           }
-          subtitle="Continuous sniffing"
+          subtitle={isLive ? 'Real-time WebSocket' : 'Continuous sniffing'}
           icon={Activity}
-          color={health?.monitoring_active || health?.status === 'healthy' ? 'cyan' : 'red'}
-          loading={healthLoading}
+          color={isLive || health?.monitoring_active ? 'cyan' : 'red'}
+          loading={healthLoading && !activeStats}
         />
       </div>
 
-      {/* Middle Row: Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Bar Chart: Connection States */}
-        <div className="lg:col-span-2 bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
+      {/* Middle Row: Visual Telemetry + Live Socket Stream */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Connection States Bar Chart (5 columns) */}
+        <div className="lg:col-span-5 bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
           <div className="flex items-center justify-between mb-4 border-b border-[#2d3548] pb-3">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-cyan-400" />
@@ -194,7 +243,7 @@ export const Overview: React.FC = () => {
           </div>
 
           <div className="h-64 w-full">
-            {statsLoading ? (
+            {statsLoading && !activeStats ? (
               <div className="h-full w-full flex items-center justify-center bg-[#111827]/40 rounded-lg animate-pulse">
                 <span className="text-xs text-slate-500">Loading metrics...</span>
               </div>
@@ -239,20 +288,20 @@ export const Overview: React.FC = () => {
           </div>
         </div>
 
-        {/* Pie Chart: Protocol Distribution */}
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
+        {/* Transport Protocol Share (3 columns) */}
+        <div className="lg:col-span-3 bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col">
           <div className="flex items-center justify-between mb-4 border-b border-[#2d3548] pb-3">
             <div className="flex items-center gap-2">
               <PieChartIcon className="h-4 w-4 text-cyan-400" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
-                Transport Protocol Share
+                Protocol Share
               </h3>
             </div>
             <span className="text-[10px] font-mono text-slate-400">TCP / UDP</span>
           </div>
 
           <div className="h-64 w-full flex items-center justify-center">
-            {statsLoading ? (
+            {statsLoading && !activeStats ? (
               <div className="h-full w-full flex items-center justify-center bg-[#111827]/40 rounded-lg animate-pulse">
                 <span className="text-xs text-slate-500">Calculating proportions...</span>
               </div>
@@ -267,8 +316,8 @@ export const Overview: React.FC = () => {
                     data={protocolData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
+                    innerRadius={45}
+                    outerRadius={75}
                     paddingAngle={4}
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
@@ -293,6 +342,15 @@ export const Overview: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Real-Time Socket Stream Feed (4 columns) */}
+        <div className="lg:col-span-4">
+          <LiveEventFeed
+            events={wsEvents}
+            isLive={isLive}
+            deltaStats={deltaStats}
+          />
+        </div>
       </div>
 
       {/* Bottom Row: Recent Connections Table */}
@@ -300,19 +358,19 @@ export const Overview: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-200 flex items-center gap-2">
             <Network className="h-4 w-4 text-cyan-400" />
-            Active Connections (Last 20)
+            Active Connections Stream
           </h2>
           <span className="text-xs text-slate-400 font-mono">
-            Auto-refreshing every 5s
+            {isLive ? 'Live via WebSocket' : 'Auto-refreshing every 5s'}
           </span>
         </div>
 
         <ConnectionTable
-          connections={connData?.connections || []}
-          loading={connLoading}
-          total={connData?.total}
+          connections={activeConnections.slice(0, 20)}
+          loading={connLoading && activeConnections.length === 0}
+          total={activeStats?.total_connections || activeConnections.length}
           showPagination={false}
-          emptyTitle="No recent connections"
+          emptyTitle="No active connections"
           emptyDescription="Waiting for network telemetry packets from daemon."
         />
       </div>

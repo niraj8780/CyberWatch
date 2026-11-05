@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useApi } from '../hooks/useApi';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { getConnections } from '../services/api';
 import ConnectionTable from '../components/ConnectionTable';
 import ErrorState from '../components/ErrorState';
@@ -7,11 +8,10 @@ import {
   Network,
   Search,
   RefreshCw,
-  SlidersHorizontal,
-  CheckCircle2,
   Activity,
-  Layers,
-  ShieldAlert,
+  Radio,
+  Pause,
+  Play,
 } from 'lucide-react';
 
 export const NetworkMonitor: React.FC = () => {
@@ -21,6 +21,9 @@ export const NetworkMonitor: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 50;
+
+  // Real-time WebSocket connection
+  const { isLive, deltaStats, isPaused, togglePause } = useWebSocket();
 
   const fetchConnectionsData = useCallback(() => {
     return getConnections({
@@ -33,7 +36,7 @@ export const NetworkMonitor: React.FC = () => {
 
   const { data, loading, error, refetch } = useApi(
     fetchConnectionsData,
-    autoRefresh ? 5000 : undefined
+    autoRefresh && !isPaused ? 5000 : undefined
   );
 
   const rawConnections = data?.connections || [];
@@ -132,21 +135,52 @@ export const NetworkMonitor: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 self-start md:self-auto">
+          {/* WebSocket Live Telemetry Indicator */}
+          {isLive && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-emerald-500/30 text-emerald-400 font-mono text-xs">
+              <Radio className="h-3.5 w-3.5 animate-pulse" />
+              <span>WS Stream Active</span>
+              {deltaStats.newCount > 0 && (
+                <span className="text-[10px] text-emerald-300">+{deltaStats.newCount}</span>
+              )}
+            </div>
+          )}
+
+          {/* Pause / Resume Live Stream Button */}
+          {isLive && (
+            <button
+              onClick={togglePause}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 ${
+                isPaused
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
+                  : 'bg-[#1e2538] text-slate-300 border-[#2d3548] hover:text-white hover:border-cyan-500/50'
+              }`}
+            >
+              {isPaused ? (
+                <>
+                  <Play className="h-3.5 w-3.5 fill-current" />
+                  Resume
+                </>
+              ) : (
+                <>
+                  <Pause className="h-3.5 w-3.5" />
+                  Pause
+                </>
+              )}
+            </button>
+          )}
+
           {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               autoRefresh
                 ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-400'
-                : 'bg-[#1e2538] border-[#2d3548] text-slate-400'
+                : 'bg-[#1e2538] border-[#2d3548] text-slate-400 hover:text-slate-200'
             }`}
           >
-            <CheckCircle2
-              className={`h-3.5 w-3.5 ${
-                autoRefresh ? 'text-cyan-400' : 'text-slate-500'
-              }`}
-            />
-            Auto-refresh (5s)
+            <Activity className="h-3.5 w-3.5" />
+            {autoRefresh ? 'Live Poll: ON' : 'Live Poll: OFF'}
           </button>
 
           {/* Manual Refresh */}
@@ -154,143 +188,135 @@ export const NetworkMonitor: React.FC = () => {
             onClick={() => refetch()}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
       </div>
 
-      {/* Stats Summary Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <div className="text-[10px] uppercase font-semibold text-slate-400">Total Filtered</div>
-            <div className="text-lg font-bold font-mono text-cyan-400">{stats.total}</div>
-          </div>
-          <Layers className="h-5 w-5 text-slate-500" />
-        </div>
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <div className="text-[10px] uppercase font-semibold text-slate-400">TCP Connections</div>
-            <div className="text-lg font-bold font-mono text-blue-400">{stats.tcp}</div>
-          </div>
-          <Activity className="h-5 w-5 text-blue-500/50" />
-        </div>
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <div className="text-[10px] uppercase font-semibold text-slate-400">UDP Sockets</div>
-            <div className="text-lg font-bold font-mono text-purple-400">{stats.udp}</div>
-          </div>
-          <Activity className="h-5 w-5 text-purple-500/50" />
-        </div>
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <div className="text-[10px] uppercase font-semibold text-slate-400">Established</div>
-            <div className="text-lg font-bold font-mono text-emerald-400">{stats.established}</div>
-          </div>
-          <CheckCircle2 className="h-5 w-5 text-emerald-500/50" />
-        </div>
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-3 flex items-center justify-between col-span-2 sm:col-span-1">
-          <div>
-            <div className="text-[10px] uppercase font-semibold text-slate-400">Listening</div>
-            <div className="text-lg font-bold font-mono text-cyan-300">{stats.listening}</div>
-          </div>
-          <ShieldAlert className="h-5 w-5 text-cyan-500/50" />
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Search IP, port, process name, or PID..."
-            className="w-full bg-[#111827] border border-[#2d3548] rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 transition-all font-mono"
-          />
-        </div>
-
-        {/* Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Protocol dropdown */}
-          <div className="flex items-center gap-1.5 bg-[#111827] border border-[#2d3548] rounded-lg px-2.5 py-1">
-            <span className="text-[11px] text-slate-400 uppercase font-semibold">Protocol:</span>
-            <select
-              value={selectedProtocol}
+      {/* Filter and Search Bar */}
+      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-4 shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
               onChange={(e) => {
-                setSelectedProtocol(e.target.value);
+                setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-transparent text-xs text-slate-200 focus:outline-none font-mono cursor-pointer"
-            >
-              <option value="ALL" className="bg-[#111827]">All</option>
-              <option value="TCP" className="bg-[#111827]">TCP</option>
-              <option value="UDP" className="bg-[#111827]">UDP</option>
-            </select>
+              placeholder="Search process name, PID, or IP address (e.g. chrome, 8000, 127.0.0.1)..."
+              className="w-full pl-9 pr-4 py-2 bg-[#111827] border border-[#2d3548] rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 font-mono transition-colors"
+            />
           </div>
 
-          {/* Status dropdown */}
-          <div className="flex items-center gap-1.5 bg-[#111827] border border-[#2d3548] rounded-lg px-2.5 py-1">
-            <span className="text-[11px] text-slate-400 uppercase font-semibold">Status:</span>
-            <select
-              value={selectedStatus}
-              onChange={(e) => {
-                setSelectedStatus(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="bg-transparent text-xs text-slate-200 focus:outline-none font-mono cursor-pointer"
-            >
-              <option value="ALL" className="bg-[#111827]">All Statuses</option>
-              <option value="ESTABLISHED" className="bg-[#111827]">ESTABLISHED</option>
-              <option value="LISTEN" className="bg-[#111827]">LISTEN</option>
-              <option value="TIME_WAIT" className="bg-[#111827]">TIME_WAIT</option>
-              <option value="CLOSE_WAIT" className="bg-[#111827]">CLOSE_WAIT</option>
-              <option value="SYN_SENT" className="bg-[#111827]">SYN_SENT</option>
-              <option value="SYN_RECV" className="bg-[#111827]">SYN_RECV</option>
-              <option value="FIN_WAIT1" className="bg-[#111827]">FIN_WAIT1</option>
-              <option value="FIN_WAIT2" className="bg-[#111827]">FIN_WAIT2</option>
-              <option value="LAST_ACK" className="bg-[#111827]">LAST_ACK</option>
-              <option value="CLOSING" className="bg-[#111827]">CLOSING</option>
-              <option value="NONE" className="bg-[#111827]">NONE</option>
-            </select>
-          </div>
+          {/* Quick Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {/* Protocol Selector */}
+            <div className="flex items-center bg-[#111827] border border-[#2d3548] rounded-lg p-1 text-xs">
+              <span className="text-[10px] text-slate-500 uppercase px-2 font-semibold">
+                Proto
+              </span>
+              {['ALL', 'TCP', 'UDP'].map((proto) => (
+                <button
+                  key={proto}
+                  onClick={() => {
+                    setSelectedProtocol(proto);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                    selectedProtocol === proto
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {proto}
+                </button>
+              ))}
+            </div>
 
-          {/* Reset Filters button */}
-          {(selectedProtocol !== 'ALL' || selectedStatus !== 'ALL' || searchQuery) && (
-            <button
-              onClick={handleResetFilters}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#242b3d] text-slate-300 hover:text-white text-xs border border-[#2d3548] transition-colors"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              Reset
-            </button>
-          )}
+            {/* Status Selector */}
+            <div className="flex items-center bg-[#111827] border border-[#2d3548] rounded-lg p-1 text-xs">
+              <span className="text-[10px] text-slate-500 uppercase px-2 font-semibold">
+                State
+              </span>
+              {['ALL', 'ESTABLISHED', 'LISTEN', 'TIME_WAIT'].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => {
+                    setSelectedStatus(st);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                    selectedStatus === st
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+
+            {/* Reset Filters */}
+            {(selectedProtocol !== 'ALL' || selectedStatus !== 'ALL' || searchQuery) && (
+              <button
+                onClick={handleResetFilters}
+                className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] border border-transparent hover:border-[#2d3548] transition-all"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filter Stats Metric Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 border-t border-[#2d3548]/60 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Matched Sockets:</span>
+            <span className="font-mono font-semibold text-slate-200">{stats.total}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">TCP Streams:</span>
+            <span className="font-mono font-semibold text-blue-400">{stats.tcp}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">UDP Sockets:</span>
+            <span className="font-mono font-semibold text-purple-400">{stats.udp}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Established:</span>
+            <span className="font-mono font-semibold text-emerald-400">
+              {stats.established}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Listeners:</span>
+            <span className="font-mono font-semibold text-cyan-400">{stats.listening}</span>
+          </div>
         </div>
       </div>
 
       {/* Error State */}
       {error && (
         <ErrorState
-          message={`Failed to query network connections: ${error}`}
-          onRetry={refetch}
+          message={`Failed to retrieve real-time network stream: ${error}`}
+          onRetry={() => refetch()}
         />
       )}
 
-      {/* Connection Table */}
+      {/* Main Connection Table with Pagination */}
       <ConnectionTable
         connections={paginatedConnections}
-        loading={loading}
+        loading={loading && rawConnections.length === 0}
         total={filteredConnections.length}
         currentPage={currentPage}
         pageSize={pageSize}
         onPageChange={handlePageChange}
-        showPagination={true}
+        emptyTitle="No matching network sockets"
+        emptyDescription="Try clearing your filters or search query to view active system sockets."
       />
     </div>
   );

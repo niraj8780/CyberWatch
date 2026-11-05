@@ -82,7 +82,7 @@ def sample_connection_data() -> list[dict[str, Any]]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_psutil_connections(monkeypatch: pytest.MonkeyPatch) -> list[MockConn]:
     """Fixture patching psutil.net_connections with mock connection tuples."""
     mock_conns = [
@@ -127,7 +127,31 @@ def mock_psutil_connections(monkeypatch: pytest.MonkeyPatch) -> list[MockConn]:
     def _mock_net_connections(kind: str = "all") -> list[MockConn]:
         return mock_conns
 
+    class MockProcess:
+        def __init__(self, pid: int = 1):
+            self.pid = pid
+        def name(self) -> str:
+            return "python.exe"
+        def cpu_percent(self) -> float:
+            return 1.2
+        def memory_percent(self) -> float:
+            return 2.5
+        def memory_info(self):
+            info = namedtuple("pmem", ["rss", "vms"])
+            return info(rss=50 * 1024 * 1024, vms=100 * 1024 * 1024)
+        def create_time(self) -> float:
+            return 1700000000.0
+        def status(self) -> str:
+            return "running"
+        def exe(self) -> str:
+            return "C:\\python.exe"
+        def cmdline(self) -> list[str]:
+            return ["python", "app.py"]
+        def net_connections(self, kind: str = "all") -> list[MockConn]:
+            return mock_conns
+
     monkeypatch.setattr(psutil, "net_connections", _mock_net_connections)
+    monkeypatch.setattr(psutil, "Process", MockProcess)
     return mock_conns
 
 

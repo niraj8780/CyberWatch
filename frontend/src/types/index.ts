@@ -117,3 +117,56 @@ export interface ProcessQueryParams {
   limit?: number;
   offset?: number;
 }
+
+export interface LiveConnectionEvent {
+  id: string;
+  event_type: 'CONNECTED' | 'DISCONNECTED';
+  protocol: string;
+  local_address: string;
+  remote_address: string | null;
+  process_name: string;
+  pid: number | null;
+  status: string;
+  timestamp: string;
+}
+
+export interface WebSocketSnapshotMessage {
+  type: 'snapshot';
+  timestamp: string;
+  data: {
+    statistics: NetworkStatistics;
+    connections: Connection[];
+    total_connections: number;
+    recent_events: LiveConnectionEvent[];
+  };
+}
+
+export interface WebSocketUpdateMessage {
+  type: 'update';
+  timestamp: string;
+  data: {
+    statistics: NetworkStatistics;
+    delta: {
+      new_count: number;
+      closed_count: number;
+      new: Connection[];
+      closed: Connection[];
+    };
+    recent_events: LiveConnectionEvent[];
+    connections_sample: Connection[];
+  };
+}
+
+export interface WebSocketPongMessage {
+  type: 'pong';
+  client_time?: string;
+  server_time: string;
+}
+
+export type WebSocketMessage =
+  | WebSocketSnapshotMessage
+  | WebSocketUpdateMessage
+  | WebSocketPongMessage;
+
+export type WebSocketStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+

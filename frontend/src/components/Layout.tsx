@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { getHealth } from '../services/api';
-import { Clock, ShieldCheck, Wifi, Menu, X } from 'lucide-react';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { Clock, ShieldCheck, Wifi, Menu, X, Radio } from 'lucide-react';
 
 export const Layout: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const location = useLocation();
+
+  // Real-time WebSocket connection telemetry for header
+  const { status: wsStatus, isLive, latencyMs } = useWebSocket();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -107,7 +111,31 @@ export const Layout: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 text-xs">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs">
+            {/* Real-time WebSocket Live Badge */}
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] font-mono text-[11px]">
+              <Radio
+                className={`h-3.5 w-3.5 ${
+                  isLive ? 'text-emerald-400 animate-pulse' : 'text-slate-500'
+                }`}
+              />
+              <span
+                className={`font-semibold tracking-wider ${
+                  isLive
+                    ? 'text-emerald-400'
+                    : wsStatus === 'connecting'
+                    ? 'text-amber-400'
+                    : 'text-slate-400'
+                }`}
+              >
+                {isLive
+                  ? `WS LIVE ${latencyMs !== null ? `(${latencyMs}ms)` : ''}`
+                  : wsStatus === 'connecting'
+                  ? 'WS CONNECTING'
+                  : 'HTTP POLLING'}
+              </span>
+            </div>
+
             {/* System Clock */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] font-mono text-slate-300">
               <Clock className="h-3.5 w-3.5 text-cyan-400" />
@@ -129,7 +157,7 @@ export const Layout: React.FC = () => {
                 />
               </span>
               <span className="font-medium text-slate-300 hidden sm:inline">
-                {isHealthy ? 'System Online' : 'Daemon Disconnected'}
+                {isHealthy ? 'Sensor Active' : 'Sensor Offline'}
               </span>
               <Wifi
                 className={`h-3.5 w-3.5 ${

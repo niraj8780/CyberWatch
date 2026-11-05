@@ -65,7 +65,7 @@ export function useApi<T>(
     let isMounted = true;
     executeFetch(true);
 
-    let intervalId: NodeJS.Timeout | number | undefined;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     if (refreshInterval && refreshInterval > 0) {
       intervalId = setInterval(() => {
         if (isMounted) {
