@@ -1,183 +1,119 @@
-# 🛡️ CyberWatch — AI-Powered Cybersecurity Monitoring Platform
+# 🛡️ CyberWatch — Full-Stack SOC Network Security & AI Incident Platform
 
-> Real-time network monitoring, threat detection, and AI-assisted security analysis for Windows 11.
+> Enterprise-grade real-time network monitoring, automated heuristic threat detection, and AI-assisted incident triage platform.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
+![WebSockets](https://img.shields.io/badge/WebSockets-Live_Streaming-FF6B6B)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ---
 
-## ✨ Features (Phase 1 — MVP)
+## 🌟 Key Platform Modules
 
-- **Real Network Monitoring** — Scans your PC's actual TCP/UDP connections using `psutil`
-- **Process Identification** — Shows which programs are making network connections
-- **Live Dashboard** — Dark SOC-inspired UI with KPI cards, charts, and connection tables
-- **REST API** — 8 versioned endpoints serving real system data
-- **Network Statistics** — Connection counts by protocol, IP version, and state
-- **Listening Port Detection** — Shows all open/listening ports on your system
-- **Auto-Refresh** — Dashboard updates every 5 seconds automatically
-- **Filtering** — Filter connections by protocol, status, or process name
+CyberWatch is a production-quality cybersecurity monitoring application designed for Security Operations Centers (SOC):
+
+### 1. 📡 Real-Time Telemetry & WebSocket Streaming
+- Scans host TCP/UDP sockets, interfaces, and process associations in real time using `psutil`.
+- High-frequency delta tracking broadcasts newly connected and disconnected sockets to connected analysts with sub-second latency.
+- Dynamic network traffic status, socket states (`ESTABLISHED`, `LISTEN`, `SYN_SENT`, `TIME_WAIT`), and protocol distributions.
+
+### 2. 🧠 Modular Threat Detection Engine
+- **Heuristic Rule Engine** evaluating connection snapshots against 6 configurable detection rules:
+  1. **Dangerous & Anomalous Destination Ports** (`4444` Metasploit, `1337`, `31337`, `6667` IRC botnets).
+  2. **Living-off-the-Land (LOLBin) Process Abuse** (detects `notepad.exe`, `calc.exe`, `vssadmin.exe`, `certutil.exe` making unauthorized external connections).
+  3. **Port Scanning Reconnaissance** (catches rapid multi-port sweeping across internal/external subnets).
+  4. **Connection Bursts & Spikes** (identifies abnormal concurrent socket surges signaling exfiltration or DDoS).
+  5. **Unexpected Wildcard Listeners** (flags sensitive services bound to `0.0.0.0`).
+  6. **Repeated Probes & Beaconing** (identifies persistent stuck `SYN_SENT` attempts to dead or sinkholed C2 servers).
+- Real-time rule toggles allow analysts to enable or disable individual heuristics on the fly.
+- Automated alert deduplication cooldown prevents notification flooding.
+
+### 3. 🚨 Alerts & Incident Triage Lifecycle
+- Complete incident management workflow: **New $\rightarrow$ Acknowledged $\rightarrow$ Resolved**.
+- High-severity threats are automatically promoted to incident tickets.
+- Analyst triage notebook: post timestamped investigation comments and assign responders.
+- Manual incident reporting for ad-hoc SOC ticket creation.
+
+### 4. 🤖 AI Security Analyst & Reasoning Engine
+- Maps incidents directly to the **MITRE ATT&CK Matrix** (e.g. *T1046 Network Service Discovery*, *T1218 System Binary Proxy Execution*, *T1055 Process Injection*).
+- Conducts automated root-cause analysis, threat actor attribution, and containment checklists.
+- Generates copyable host isolation and remediation CLI commands (PowerShell / Windows Firewall).
+- Interactive conversational AI interface for technical cybersecurity inquiries.
+
+### 5. 🌍 IP Intelligence & Geolocation
+- Automatic classification of Private (RFC 1918), Loopback, Multicast, and Public internet addresses.
+- Enriches IP addresses with country origin, city, ISP / Organization, ASN, and reputation threat scores (0–100).
+- Flagging for Tor exit nodes, public DNS resolvers, and known malicious command-and-control servers.
+
+### 6. 📄 Executive Reports & Compliance Audit
+- Automated evaluation of enterprise compliance frameworks: **NIST CSF 2.0**, **CIS Controls v8**, **PCI-DSS v4.0**, and **ISO 27001:2022**.
+- Overall Security Posture Health Score (0–100) and risk tier classification (`LOW`, `MODERATE`, `ELEVATED`, `CRITICAL`).
+- One-click structured **CSV export** for audit logging and printable **Executive PDF Report**.
+
+---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────┐     ┌──────────────────────────┐
-│    Frontend (React/Vite)    │────▶│   Backend (FastAPI)      │
-│    localhost:5173            │     │   localhost:8000         │
-│                             │     │                          │
-│  • Overview Dashboard       │     │  • Network Monitor       │
-│  • Network Monitor Page     │◀────│    (psutil, real data)   │
-│  • Process Inspector        │     │  • Process Monitor       │
-│  • Charts (Recharts)        │     │  • REST API v1           │
-│  • Dark SOC Theme           │     │  • Structured Logging    │
-└─────────────────────────────┘     └──────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CyberWatch SOC Platform                         │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+         ┌─────────────────────────┴─────────────────────────┐
+         ▼                                                   ▼
+┌───────────────────────────────┐           ┌────────────────────────────────┐
+│   React 18 + TypeScript UI    │           │      FastAPI Python Server     │
+│       localhost:5173          │           │         localhost:8000         │
+├───────────────────────────────┤           ├────────────────────────────────┤
+│ • Overview Telemetry          │ WebSocket │ • WebSocket Live Manager       │
+│ • Network Connection Monitor  │◀─────────▶│ • Real psutil Telemetry Loop   │
+│ • Heuristic Threat Detection  │           │ • RuleEngine (6 Heuristics)    │
+│ • Incident Triage Queue       │           │ • AlertManager (CRUD Lifecycle)│
+│ • AI Security Analyst Console │  REST v1  │ • IP Intelligence Service      │
+│ • Executive Audit Reports     │◀─────────▶│ • AI Reasoning Engine          │
+│ • Dark SOC Aesthetic          │           │ • Compliance Report Generator  │
+└───────────────────────────────┘           └────────────────────────────────┘
 ```
 
-## 📋 Prerequisites
+---
 
-| Tool | Version | Download |
-|------|---------|----------|
-| Python | 3.11+ | [python.org](https://www.python.org/downloads/) |
-| Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
-| Git | Any | [git-scm.com](https://git-scm.com/) |
+## 🚀 Quick Start (Windows 11 / PowerShell)
 
-## 🚀 Quick Start (Windows 11)
+### Prerequisites
+- **Python 3.11+** installed (`python --version`)
+- **Node.js 18+** installed (`node --version`)
 
-### Step 1: Backend Setup
-
+### 1. Start Backend API
 ```powershell
-# Navigate to the backend directory
-cd CyberWatch\backend
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-.\venv\Scripts\Activate.ps1
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Copy environment file
-copy .env.example .env
-
-# Start the backend server (requires admin for full network monitoring)
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+cd 'CyberWatch\backend'
+python -m uvicorn app.main:app --reload --port 8000
 ```
+*Backend runs at: `http://localhost:8000` (API documentation at `http://localhost:8000/docs`)*
 
-You should see:
-```
-INFO:     Uvicorn running on http://0.0.0.0:8000
-```
-
-Verify: Open http://localhost:8000/docs to see the Swagger API documentation.
-
-### Step 2: Frontend Setup (New Terminal)
-
+### 2. Start Frontend Dashboard
 ```powershell
-# Navigate to the frontend directory
-cd CyberWatch\frontend
-
-# Install Node.js dependencies
-npm install
-
-# Start the development server
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+$env:ComSpec = "C:\Windows\system32\cmd.exe"
+cd 'CyberWatch\frontend'
 npm run dev
 ```
+*Frontend runs at: `http://localhost:5173`*
 
-You should see:
-```
-VITE v6.0.3  ready in 500ms
-➜  Local: http://localhost:5173/
-```
+---
 
-### Step 3: Open the Dashboard
+## 🧪 Testing
 
-Open **http://localhost:5173** in your browser. You'll see your real network connections!
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/health` | Health check + monitoring status |
-| GET | `/api/v1/system/info` | System info (hostname, CPU, memory) |
-| GET | `/api/v1/network/connections` | Active network connections (filterable) |
-| GET | `/api/v1/network/interfaces` | Network interfaces |
-| GET | `/api/v1/network/statistics` | Connection statistics breakdown |
-| GET | `/api/v1/network/listening-ports` | Open listening ports |
-| GET | `/api/v1/processes` | Processes with network connections |
-| GET | `/api/v1/processes/{pid}` | Detailed process information |
-
-### Query Parameters (connections)
-
-- `protocol` — Filter by `tcp` or `udp`
-- `status` — Filter by state (e.g., `ESTABLISHED`, `LISTEN`)
-- `process_name` — Search by process name
-- `limit` — Results per page (default: 500)
-- `offset` — Pagination offset
-
-## 🧪 Running Tests
-
+Run backend test suites:
 ```powershell
-cd backend
-.\venv\Scripts\Activate.ps1
-pytest -v
+cd 'CyberWatch\backend'
+pytest tests/ -v
 ```
 
-## 🗂️ Project Structure
+---
 
-```
-CyberWatch/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI app entry point
-│   │   ├── config.py            # Settings management
-│   │   ├── api/v1/endpoints/    # REST API endpoints
-│   │   ├── monitoring/          # Network & process monitors (psutil)
-│   │   ├── schemas/             # Pydantic response schemas
-│   │   ├── models/              # SQLAlchemy ORM models
-│   │   └── database/            # DB session & base classes
-│   ├── tests/                   # pytest test suite
-│   ├── requirements.txt
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── pages/               # Dashboard pages (Overview, Network, etc.)
-│   │   ├── components/          # Reusable UI components
-│   │   ├── services/api.ts      # Backend API client
-│   │   ├── hooks/useApi.ts      # Data fetching hook
-│   │   └── types/index.ts       # TypeScript definitions
-│   ├── package.json
-│   └── vite.config.ts
-├── docker-compose.yml
-├── .gitignore
-├── LICENSE
-└── README.md
-```
-
-## 🔒 Security Notes
-
-- Monitoring is **passive only** — CyberWatch never modifies connections, kills processes, or changes firewall rules
-- No packet payload capture — only connection metadata (IPs, ports, process names)
-- No API keys are required for Phase 1
-- All data stays local on your machine
-
-## 🗺️ Roadmap
-
-| Phase | Feature | Status |
-|-------|---------|--------|
-| 1 | Network Monitoring + Dashboard | ✅ Complete |
-| 2 | WebSocket Live Updates | 🔜 Next |
-| 3 | Threat Detection Engine | 📋 Planned |
-| 4 | Alert Management | 📋 Planned |
-| 5 | AI Security Analyst | 📋 Planned |
-| 6 | IP Intelligence | 📋 Planned |
-| 7 | Reports (PDF/CSV) | 📋 Planned |
-| 8 | Docker + CI/CD + Docs | 📋 Planned |
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE).
+## 📜 License
+Released under the [MIT License](LICENSE).

@@ -165,11 +165,22 @@ class NetworkMonitor:
                 # Prepend newer events and cap ring buffer
                 self._recent_events = (new_events + self._recent_events)[: self._max_events]
 
+        # Phase 3 Threat Detection Engine integration
+        new_threat_events = []
+        try:
+            from app.detection.rule_engine import rule_engine
+            new_threat_events = await rule_engine.run_scan(connections)
+            if new_threat_events:
+                logger.info("threats_detected_in_cycle", count=len(new_threat_events))
+        except Exception as scan_err:
+            logger.debug("threat_detection_cycle_skipped", error=str(scan_err))
+
         logger.debug(
             "network_connections_collected",
             count=len(connections),
             new_conns=len(new_conns_list),
             closed_conns=len(closed_conns_list),
+            threats_detected=len(new_threat_events),
         )
 
         # Broadcast live update to all active WebSocket clients if any are connected
@@ -188,6 +199,7 @@ class NetworkMonitor:
                     },
                     "recent_events": self._recent_events[:15],
                     "connections_sample": connections[:25],
+                    "threat_events_count": len(new_threat_events),
                 },
             }
             await ws_manager.broadcast(broadcast_msg)

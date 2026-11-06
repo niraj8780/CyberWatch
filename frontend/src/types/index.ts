@@ -170,3 +170,208 @@ export type WebSocketMessage =
 
 export type WebSocketStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
+// Phase 3 Threat Detection Types
+export type SeverityLevel = 'low' | 'medium' | 'high';
+
+export interface SecurityEvent {
+  id: string;
+  timestamp: string;
+  rule_id: string;
+  rule_name: string;
+  detection_type: string;
+  severity: SeverityLevel;
+  confidence: number;
+  title: string;
+  description: string;
+  source_ip: string | null;
+  source_port: number | null;
+  dest_ip: string | null;
+  dest_port: number | null;
+  protocol: string | null;
+  process_name: string | null;
+  pid: number | null;
+  evidence: Record<string, any>;
+  recommendations: string[];
+}
+
+export interface SecurityEventListResponse {
+  total: number;
+  items: SecurityEvent[];
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  limit: number;
+  offset: number;
+}
+
+export interface DetectionRule {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  severity: SeverityLevel;
+  enabled: boolean;
+  config: Record<string, any>;
+}
+
+export interface SecuritySummary {
+  total_events: number;
+  high_severity_count: number;
+  medium_severity_count: number;
+  low_severity_count: number;
+  active_rules_count: number;
+  total_rules_count: number;
+  last_scan_time: string | null;
+  threat_level: 'LOW' | 'ELEVATED' | 'HIGH' | 'CRITICAL';
+  top_flagged_processes: Array<{ process_name: string; count: number }>;
+  top_flagged_ports: Array<{ port: number; count: number }>;
+}
+
+export interface ManualScanResult {
+  scanned_connections_count: number;
+  new_threats_detected: number;
+  total_active_threats: number;
+  events: SecurityEvent[];
+  scan_duration_ms: number;
+  timestamp: string;
+}
+
+export interface SecurityQueryParams {
+  severity?: string;
+  rule_id?: string;
+  process_name?: string;
+  limit?: number;
+  offset?: number;
+}
+
+// Phase 4 Final Grand Release Types
+export type AlertStatus = 'new' | 'acknowledged' | 'resolved';
+export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface AlertNote {
+  id: string;
+  author: string;
+  timestamp: string;
+  content: string;
+}
+
+export interface Alert {
+  id: string;
+  event_id: string | null;
+  title: string;
+  description: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  assigned_to: string;
+  source_ip: string | null;
+  source_port: number | null;
+  dest_ip: string | null;
+  dest_port: number | null;
+  process_name: string | null;
+  pid: number | null;
+  created_at: string;
+  updated_at: string;
+  notes: AlertNote[];
+  recommendations: string[];
+}
+
+export interface AlertListResponse {
+  total: number;
+  items: Alert[];
+  new_count: number;
+  acknowledged_count: number;
+  resolved_count: number;
+  critical_count: number;
+  high_count: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AlertSummary {
+  total_alerts: number;
+  new_alerts: number;
+  acknowledged_alerts: number;
+  resolved_alerts: number;
+  critical_alerts: number;
+  high_alerts: number;
+  medium_alerts: number;
+  low_alerts: number;
+  mean_time_to_acknowledge: string;
+  mean_time_to_resolve: string;
+}
+
+export type IPType = 'loopback' | 'private' | 'public' | 'multicast';
+export type ReputationStatus = 'clean' | 'suspicious' | 'malicious' | 'unknown';
+
+export interface IPIntelligence {
+  ip: string;
+  ip_type: IPType;
+  is_private: boolean;
+  country_code: string | null;
+  country_name: string | null;
+  city: string | null;
+  asn: string | null;
+  organization: string | null;
+  threat_score: number;
+  reputation: ReputationStatus;
+  flags: string[];
+  last_analyzed: string;
+}
+
+export interface MitreTactic {
+  id: string;
+  name: string;
+  tactic: string;
+}
+
+export interface AIThreatAnalysis {
+  analysis_id: string;
+  incident_summary: string;
+  mitre_techniques: MitreTactic[];
+  severity_assessment: string;
+  root_cause_analysis: string;
+  potential_impact: string;
+  threat_actor_attribution: string;
+  containment_checklist: string[];
+  suggested_commands: string[];
+  generated_at: string;
+}
+
+export interface AIChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: string;
+}
+
+export interface AIChatResponse {
+  reply: string;
+  suggested_followups: string[];
+  timestamp: string;
+}
+
+export interface ComplianceScore {
+  framework: string;
+  score: number;
+  status: string;
+  details: string;
+}
+
+export interface ExecutiveReport {
+  report_id: string;
+  generated_at: string;
+  hostname: string;
+  overall_posture_score: number;
+  risk_tier: string;
+  total_sockets_audited: number;
+  threats_detected_count: number;
+  open_alerts_count: number;
+  resolved_incidents_count: number;
+  compliance_evaluations: ComplianceScore[];
+  top_flagged_processes: Array<{ process_name: string; count: number }>;
+  top_targeted_ports: Array<{ port: number; count: number }>;
+  executive_summary: string;
+  strategic_recommendations: string[];
+}
+
+
+

@@ -27,11 +27,11 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Overview', path: '/', icon: LayoutDashboard },
   { label: 'Network Monitor', path: '/network', icon: Network },
-  { label: 'Threat Detection', path: '/threats', icon: ShieldAlert, soon: true },
-  { label: 'Alerts', path: '/alerts', icon: Bell, soon: true },
+  { label: 'Threat Detection', path: '/threats', icon: ShieldAlert },
+  { label: 'Alerts', path: '/alerts', icon: Bell },
   { label: 'Processes', path: '/processes', icon: Cpu },
-  { label: 'AI Analyst', path: '/ai-analyst', icon: Brain, soon: true },
-  { label: 'Reports', path: '/reports', icon: FileText, soon: true },
+  { label: 'AI Analyst', path: '/ai-analyst', icon: Brain },
+  { label: 'Reports', path: '/reports', icon: FileText },
   { label: 'Settings', path: '/settings', icon: Settings },
 ];
 

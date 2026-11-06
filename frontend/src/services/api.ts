@@ -10,6 +10,20 @@ import {
   ProcessListResponse,
   ProcessQueryParams,
   SystemInfo,
+  SecurityEvent,
+  SecurityEventListResponse,
+  DetectionRule,
+  SecuritySummary,
+  ManualScanResult,
+  SecurityQueryParams,
+  Alert,
+  AlertListResponse,
+  AlertSummary,
+  IPIntelligence,
+  AIThreatAnalysis,
+  AIChatResponse,
+  AIChatMessage,
+  ExecutiveReport,
 } from '../types';
 
 const api = axios.create({
@@ -112,5 +126,186 @@ export const getProcessDetail = async (pid: number): Promise<ProcessDetail> => {
   const response = await api.get<ProcessDetail>(`/processes/${pid}`);
   return response.data;
 };
+
+// ==========================================
+// Phase 3 Threat Detection Engine Endpoints
+// ==========================================
+
+/**
+ * Fetch detected security events with optional filters.
+ */
+export const getSecurityEvents = async (
+  params?: SecurityQueryParams
+): Promise<SecurityEventListResponse> => {
+  const response = await api.get<SecurityEventListResponse>('/security/events', {
+    params,
+  });
+  return response.data;
+};
+
+/**
+ * Fetch a single security event by its ID.
+ */
+export const getSecurityEventById = async (id: string): Promise<SecurityEvent> => {
+  const response = await api.get<SecurityEvent>(`/security/events/${id}`);
+  return response.data;
+};
+
+/**
+ * Fetch high-level security summary posture and metrics.
+ */
+export const getSecuritySummary = async (): Promise<SecuritySummary> => {
+  const response = await api.get<SecuritySummary>('/security/summary');
+  return response.data;
+};
+
+/**
+ * Fetch all registered threat detection rules.
+ */
+export const getDetectionRules = async (): Promise<DetectionRule[]> => {
+  const response = await api.get<DetectionRule[]>('/security/rules');
+  return response.data;
+};
+
+/**
+ * Enable or disable a specific detection rule.
+ */
+export const toggleDetectionRule = async (
+  ruleId: string,
+  enabled: boolean
+): Promise<DetectionRule> => {
+  const response = await api.patch<DetectionRule>(`/security/rules/${ruleId}`, {
+    enabled,
+  });
+  return response.data;
+};
+
+/**
+ * Trigger an immediate threat detection scan against active sockets.
+ */
+export const triggerSecurityScan = async (): Promise<ManualScanResult> => {
+  const response = await api.post<ManualScanResult>('/security/scan');
+  return response.data;
+};
+
+/**
+ * Clear the current security event buffer.
+ */
+export const clearSecurityEvents = async (): Promise<{ message: string; cleared_count: number }> => {
+  const response = await api.delete<{ message: string; cleared_count: number }>('/security/events');
+  return response.data;
+};
+
+// ==========================================
+// Phase 4 Alerts & Incident Management
+// ==========================================
+
+export const getAlerts = async (params?: {
+  status?: string;
+  severity?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<AlertListResponse> => {
+  const response = await api.get<AlertListResponse>('/alerts', { params });
+  return response.data;
+};
+
+export const getAlertById = async (alertId: string): Promise<Alert> => {
+  const response = await api.get<Alert>(`/alerts/${alertId}`);
+  return response.data;
+};
+
+export const getAlertsSummary = async (): Promise<AlertSummary> => {
+  const response = await api.get<AlertSummary>('/alerts/summary');
+  return response.data;
+};
+
+export const createAlert = async (payload: {
+  title: string;
+  description: string;
+  severity?: string;
+  source_ip?: string;
+  dest_ip?: string;
+  dest_port?: number;
+  process_name?: string;
+  pid?: number;
+}): Promise<Alert> => {
+  const response = await api.post<Alert>('/alerts', payload);
+  return response.data;
+};
+
+export const updateAlert = async (
+  alertId: string,
+  payload: {
+    status?: string;
+    assigned_to?: string;
+    note?: string;
+  }
+): Promise<Alert> => {
+  const response = await api.patch<Alert>(`/alerts/${alertId}`, payload);
+  return response.data;
+};
+
+// ==========================================
+// Phase 4 IP Intelligence & Geolocation
+// ==========================================
+
+export const getIPIntelligence = async (ip: string): Promise<IPIntelligence> => {
+  const response = await api.get<IPIntelligence>(`/intelligence/ip/${encodeURIComponent(ip)}`);
+  return response.data;
+};
+
+export const batchIPIntelligence = async (
+  ips: string[]
+): Promise<{ results: Record<string, IPIntelligence>; total_processed: number }> => {
+  const response = await api.post<{ results: Record<string, IPIntelligence>; total_processed: number }>(
+    '/intelligence/ip/batch',
+    { ips }
+  );
+  return response.data;
+};
+
+// ==========================================
+// Phase 4 AI Security Analyst
+// ==========================================
+
+export const analyzeThreatWithAI = async (payload: {
+  event_id?: string;
+  title: string;
+  description: string;
+  source_ip?: string;
+  dest_ip?: string;
+  dest_port?: number;
+  process_name?: string;
+  pid?: number;
+  evidence?: Record<string, any>;
+}): Promise<AIThreatAnalysis> => {
+  const response = await api.post<AIThreatAnalysis>('/ai/analyze', payload);
+  return response.data;
+};
+
+export const chatWithAIAnalyst = async (
+  message: string,
+  history: AIChatMessage[] = []
+): Promise<AIChatResponse> => {
+  const response = await api.post<AIChatResponse>('/ai/chat', { message, history });
+  return response.data;
+};
+
+export const getAIQuickPrompts = async (): Promise<Array<{ id: string; title: string; prompt: string }>> => {
+  const response = await api.get<Array<{ id: string; title: string; prompt: string }>>('/ai/quick-prompts');
+  return response.data;
+};
+
+// ==========================================
+// Phase 4 Executive Security Reports
+// ==========================================
+
+export const getExecutiveReport = async (): Promise<ExecutiveReport> => {
+  const response = await api.get<ExecutiveReport>('/reports/executive');
+  return response.data;
+};
+
+export const getReportCsvDownloadUrl = (): string => '/api/v1/reports/export/csv';
 
 export default api;
