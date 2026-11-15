@@ -279,6 +279,7 @@ export const analyzeThreatWithAI = async (payload: {
   process_name?: string;
   pid?: number;
   evidence?: Record<string, any>;
+  api_key?: string;
 }): Promise<AIThreatAnalysis> => {
   const response = await api.post<AIThreatAnalysis>('/ai/analyze', payload);
   return response.data;
@@ -286,9 +287,14 @@ export const analyzeThreatWithAI = async (payload: {
 
 export const chatWithAIAnalyst = async (
   message: string,
-  history: AIChatMessage[] = []
+  history: AIChatMessage[] = [],
+  apiKey?: string
 ): Promise<AIChatResponse> => {
-  const response = await api.post<AIChatResponse>('/ai/chat', { message, history });
+  const response = await api.post<AIChatResponse>('/ai/chat', {
+    message,
+    history,
+    api_key: apiKey || localStorage.getItem('cyberwatch_gemini_key') || undefined,
+  });
   return response.data;
 };
 

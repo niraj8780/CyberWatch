@@ -93,7 +93,7 @@ def test_ai_analyst_threat_investigation() -> None:
         dest_ip="198.51.100.25",
         dest_port=8080,
     )
-    res = ai_analyst.analyze_threat(req)
+    res = asyncio.run(ai_analyst.analyze_threat(req))
     assert res.analysis_id.startswith("ai-diag-")
     assert len(res.mitre_techniques) >= 1
     assert any("LOLBin" in t.name or "Injection" in t.name for t in res.mitre_techniques)
@@ -104,7 +104,7 @@ def test_ai_analyst_threat_investigation() -> None:
 def test_ai_analyst_chat_assistance() -> None:
     """Verify AI analyst chat responds to cybersecurity inquiries."""
     chat_req = AIChatRequest(message="Why is port 4444 dangerous?")
-    chat_res = ai_analyst.chat(chat_req)
+    chat_res = asyncio.run(ai_analyst.chat(chat_req))
     assert "4444" in chat_res.reply
     assert "Metasploit" in chat_res.reply
     assert len(chat_res.suggested_followups) >= 1

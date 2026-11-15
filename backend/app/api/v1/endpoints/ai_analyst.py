@@ -21,7 +21,7 @@ router = APIRouter()
 )
 async def analyze_threat(payload: AIThreatAnalysisRequest) -> AIThreatAnalysisResponse:
     """Analyze a threat event or alert with the AI Security Analyst."""
-    return ai_analyst.analyze_threat(payload)
+    return await ai_analyst.analyze_threat(payload)
 
 
 @router.post(
@@ -32,7 +32,7 @@ async def analyze_threat(payload: AIThreatAnalysisRequest) -> AIThreatAnalysisRe
 )
 async def chat_with_analyst(payload: AIChatRequest) -> AIChatResponse:
     """Send a query to the AI Security Analyst."""
-    return ai_analyst.chat(payload)
+    return await ai_analyst.chat(payload)
 
 
 @router.get(
@@ -45,22 +45,32 @@ async def get_quick_prompts() -> list[dict[str, str]]:
     return [
         {
             "id": "prompt-1",
+            "title": "Current Host Telemetry",
+            "prompt": "What is my current threat posture, active socket count, and open alerts?",
+        },
+        {
+            "id": "prompt-2",
             "title": "Explain Port 4444 Risks",
             "prompt": "Why is destination port 4444 flagged as high severity in CyberWatch?",
         },
         {
-            "id": "prompt-2",
+            "id": "prompt-3",
             "title": "Investigate LOLBin Injection",
             "prompt": "How do adversaries abuse notepad.exe or calc.exe for C2 network beaconing?",
         },
         {
-            "id": "prompt-3",
+            "id": "prompt-4",
             "title": "Port Scanning Mitigation",
             "prompt": "What are the recommended steps when a port scan is detected on internal subnets?",
         },
         {
-            "id": "prompt-4",
+            "id": "prompt-5",
             "title": "SOC Triage Playbook",
-            "prompt": "Give me the standard incident triage workflow for resolving new alerts.",
+            "prompt": "Give me the standard 5-stage incident triage workflow for resolving new alerts.",
+        },
+        {
+            "id": "prompt-6",
+            "title": "Firewall Hardening",
+            "prompt": "How do I create a Windows Firewall rule to block malicious outbound ports?",
         },
     ]
