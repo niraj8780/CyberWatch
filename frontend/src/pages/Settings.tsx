@@ -40,20 +40,36 @@ export const Settings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#2d3548]">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <div>
-          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
-            <SettingsIcon className="h-5 w-5 text-cyan-400" />
+          <h1 className="text-xl font-bold flex items-center gap-2.5" style={{ color: 'var(--text-primary)' }}>
+            <SettingsIcon className="h-5 w-5" style={{ color: 'var(--accent)' }} />
             System &amp; Sensor Settings
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
             Telemetry daemon diagnostics, host platform specifications, and monitoring configuration.
           </p>
         </div>
 
         <button
           onClick={handleRefreshAll}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 self-start sm:self-auto"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--accent)';
+            e.currentTarget.style.borderColor = 'var(--border-hover)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--text-secondary)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+          }}
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh Status
@@ -70,10 +86,16 @@ export const Settings: React.FC = () => {
       {/* Grid of panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Backend Daemon Status */}
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg">
-          <div className="flex items-center justify-between border-b border-[#2d3548] pb-3 mb-4">
-            <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-cyan-400" />
+        <div
+          className="rounded-xl p-5 shadow-lg"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        >
+          <div
+            className="flex items-center justify-between pb-3 mb-4"
+            style={{ borderBottom: '1px solid var(--border)' }}
+          >
+            <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Activity className="h-4 w-4" style={{ color: 'var(--accent)' }} />
               Monitoring Service Health
             </h2>
             {health && (
@@ -87,32 +109,32 @@ export const Settings: React.FC = () => {
           {healthLoading ? (
             <div className="space-y-3 animate-pulse">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-4 bg-[#2d3548] rounded" />
+                <div key={i} className="h-4 rounded" style={{ background: 'var(--bg-card-hover)' }} />
               ))}
             </div>
           ) : health ? (
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400">Application Name</span>
-                <span className="font-mono text-slate-200">{health.app}</span>
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Application Name</span>
+                <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{health.app}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400">Daemon Version</span>
-                <span className="font-mono text-cyan-400 font-semibold">{health.version}</span>
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Daemon Version</span>
+                <span className="font-mono font-semibold" style={{ color: 'var(--accent)' }}>{health.version}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400">Uptime</span>
-                <span className="font-mono text-slate-200">
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Uptime</span>
+                <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
                   {Math.floor(health.uptime_seconds / 3600)}h{' '}
                   {Math.floor((health.uptime_seconds % 3600) / 60)}m{' '}
                   {Math.floor(health.uptime_seconds % 60)}s
                 </span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-400">Background Packet Capture</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Background Packet Capture</span>
                 <span className="font-mono">
                   {health.monitoring_active ? (
-                    <span className="text-emerald-400 font-medium">ENABLED &amp; CAPTURING</span>
+                    <span className="font-medium" style={{ color: 'var(--accent)' }}>ENABLED &amp; CAPTURING</span>
                   ) : (
                     <span className="text-rose-400 font-medium">DISABLED</span>
                   )}
@@ -127,13 +149,22 @@ export const Settings: React.FC = () => {
         </div>
 
         {/* Host Machine Specifications */}
-        <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg">
-          <div className="flex items-center justify-between border-b border-[#2d3548] pb-3 mb-4">
-            <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Server className="h-4 w-4 text-cyan-400" />
+        <div
+          className="rounded-xl p-5 shadow-lg"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        >
+          <div
+            className="flex items-center justify-between pb-3 mb-4"
+            style={{ borderBottom: '1px solid var(--border)' }}
+          >
+            <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Server className="h-4 w-4" style={{ color: 'var(--accent)' }} />
               Host Telemetry System
             </h2>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#242b3d] text-slate-400 border border-[#2d3548]">
+            <span
+              className="text-[10px] uppercase font-mono px-2 py-0.5 rounded"
+              style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+            >
               Read-Only
             </span>
           </div>
@@ -141,48 +172,48 @@ export const Settings: React.FC = () => {
           {systemLoading ? (
             <div className="space-y-3 animate-pulse">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-4 bg-[#2d3548] rounded" />
+                <div key={i} className="h-4 rounded" style={{ background: 'var(--bg-card-hover)' }} />
               ))}
             </div>
           ) : system ? (
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <Server className="h-3.5 w-3.5 text-slate-500" /> Hostname
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Server className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> Hostname
                 </span>
-                <span className="font-mono text-slate-200 font-semibold">{system.hostname}</span>
+                <span className="font-mono font-semibold" style={{ color: 'var(--text-primary)' }}>{system.hostname}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <Cpu className="h-3.5 w-3.5 text-slate-500" /> OS Platform
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Cpu className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> OS Platform
                 </span>
-                <span className="font-mono text-slate-200">{system.platform}</span>
+                <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{system.platform}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <Cpu className="h-3.5 w-3.5 text-slate-500" /> CPU Cores
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Cpu className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> CPU Cores
                 </span>
-                <span className="font-mono text-cyan-400">{system.cpu_count} logical cores</span>
+                <span className="font-mono" style={{ color: 'var(--accent)' }}>{system.cpu_count} logical cores</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <HardDrive className="h-3.5 w-3.5 text-slate-500" /> Physical RAM
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <HardDrive className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> Physical RAM
                 </span>
-                <span className="font-mono text-slate-200">
+                <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
                   {system.memory_available_gb} GB free / {system.memory_total_gb} GB ({system.memory_percent}%)
                 </span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#2d3548]/40">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-slate-500" /> Boot Timestamp
+              <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Clock className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> Boot Timestamp
                 </span>
-                <span className="font-mono text-slate-300">{system.boot_time}</span>
+                <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{system.boot_time}</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-400 flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-slate-500" /> Runtime Engine
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Info className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} /> Runtime Engine
                 </span>
-                <span className="font-mono text-slate-400">Python {system.python_version}</span>
+                <span className="font-mono" style={{ color: 'var(--text-muted)' }}>Python {system.python_version}</span>
               </div>
             </div>
           ) : (
@@ -194,16 +225,19 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Monitoring Config Notice */}
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg">
+      <div
+        className="rounded-xl p-5 shadow-lg"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
             <ShieldAlert className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-200">
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               Advanced Telemetry Controls
             </h3>
-            <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+            <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Detection thresholds, automated packet capture filters, AI analyzer model weights, and custom alerting webhooks can be inspected here.
               Dynamic threshold configuration and sensor management will be fully unlocked in future phases.
             </p>

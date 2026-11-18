@@ -117,15 +117,20 @@ export const ThreatDetection: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-rose-400" />
+            <h1
+              className="text-xl font-bold tracking-tight flex items-center gap-2"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <ShieldAlert className="w-5 h-5" style={{ color: '#f43f5e' }} />
               Threat Detection Engine
             </h1>
-            <span className="font-mono text-[10px] bg-rose-500/10 border border-rose-500/30 text-rose-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+              style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', color: '#f43f5e' }}
+            >
               Phase 3 Active
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
             Real-time heuristic anomaly detection, LOLBin activity tracking, and port scan recognition.
           </p>
         </div>
@@ -135,7 +140,12 @@ export const ThreatDetection: React.FC = () => {
           <button
             onClick={handleClearEvents}
             disabled={events.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#172136] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-[#2d3548] hover:border-rose-500/40 rounded-lg text-xs font-mono transition disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono transition disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: 'var(--bg-card)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+            }}
             title="Clear threat event log"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -145,7 +155,12 @@ export const ThreatDetection: React.FC = () => {
           <button
             onClick={handleRunScan}
             disabled={isScanning}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-lg text-xs font-mono font-semibold shadow-[0_0_15px_rgba(244,63,94,0.3)] transition disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold transition disabled:opacity-50"
+            style={{
+              background: 'linear-gradient(to right, #e11d48, #f43f5e)',
+              color: '#fff',
+              boxShadow: '0 0 15px rgba(244,63,94,0.3)',
+            }}
           >
             {isScanning ? (
               <>
@@ -164,8 +179,15 @@ export const ThreatDetection: React.FC = () => {
 
       {/* Scan Feedback Banner */}
       {scanMessage && (
-        <div className="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-lg flex items-center gap-2.5 text-xs font-mono text-cyan-200 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+        <div
+          className="p-3 rounded-lg flex items-center gap-2.5 text-xs font-mono animate-fadeIn"
+          style={{
+            background: 'var(--accent-dim)',
+            border: '1px solid var(--border-hover)',
+            color: 'var(--accent)',
+          }}
+        >
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent)' }} />
           <span>{scanMessage}</span>
         </div>
       )}
@@ -207,14 +229,18 @@ export const ThreatDetection: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-[#2d3548] gap-6 text-xs font-mono select-none">
+      <div
+        className="flex gap-6 text-xs font-mono select-none"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <button
           onClick={() => setActiveTab('events')}
-          className={`pb-3 flex items-center gap-2 border-b-2 transition ${
+          className="pb-3 flex items-center gap-2 border-b-2 transition"
+          style={
             activeTab === 'events'
-              ? 'border-cyan-400 text-cyan-400 font-bold'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 700 }
+              : { borderColor: 'transparent', color: 'var(--text-secondary)' }
+          }
         >
           <Activity className="w-3.5 h-3.5" />
           <span>Threat Events ({events.length})</span>
@@ -222,11 +248,12 @@ export const ThreatDetection: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('rules')}
-          className={`pb-3 flex items-center gap-2 border-b-2 transition ${
+          className="pb-3 flex items-center gap-2 border-b-2 transition"
+          style={
             activeTab === 'rules'
-              ? 'border-cyan-400 text-cyan-400 font-bold'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 700 }
+              : { borderColor: 'transparent', color: 'var(--text-secondary)' }
+          }
         >
           <Sliders className="w-3.5 h-3.5" />
           <span>Detection Rules ({rules.length})</span>
@@ -234,11 +261,12 @@ export const ThreatDetection: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`pb-3 flex items-center gap-2 border-b-2 transition ${
+          className="pb-3 flex items-center gap-2 border-b-2 transition"
+          style={
             activeTab === 'analytics'
-              ? 'border-cyan-400 text-cyan-400 font-bold'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 700 }
+              : { borderColor: 'transparent', color: 'var(--text-secondary)' }
+          }
         >
           <BarChart2 className="w-3.5 h-3.5" />
           <span>Threat Analytics</span>
@@ -265,10 +293,19 @@ export const ThreatDetection: React.FC = () => {
       {activeTab === 'analytics' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Top Flagged Processes */}
-          <div className="bg-[#111827] border border-[#2d3548] rounded-xl p-5 shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#2d3548] mb-4">
-              <Cpu className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
+          <div
+            className="rounded-xl p-5 shadow-lg"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+          >
+            <div
+              className="flex items-center gap-2 pb-3 mb-4"
+              style={{ borderBottom: '1px solid var(--border)' }}
+            >
+              <Cpu className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <h3
+                className="text-xs font-semibold uppercase tracking-wider font-mono"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 Top Flagged Processes
               </h3>
             </div>
@@ -277,27 +314,46 @@ export const ThreatDetection: React.FC = () => {
                 {summary.top_flagged_processes.map((proc, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 bg-[#172136] rounded-lg border border-[#2d3548] font-mono text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-lg font-mono text-xs"
+                    style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
                   >
-                    <span className="text-slate-200 font-medium">{proc.process_name}</span>
-                    <span className="text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                    <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {proc.process_name}
+                    </span>
+                    <span
+                      className="font-bold px-2 py-0.5 rounded"
+                      style={{
+                        color: '#f43f5e',
+                        background: 'rgba(244,63,94,0.1)',
+                        border: '1px solid rgba(244,63,94,0.2)',
+                      }}
+                    >
                       {proc.count} detections
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-xs font-mono text-slate-400">
+              <div className="text-center py-8 text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
                 No process-specific threats recorded yet.
               </div>
             )}
           </div>
 
           {/* Top Flagged Destination Ports */}
-          <div className="bg-[#111827] border border-[#2d3548] rounded-xl p-5 shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#2d3548] mb-4">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
+          <div
+            className="rounded-xl p-5 shadow-lg"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+          >
+            <div
+              className="flex items-center gap-2 pb-3 mb-4"
+              style={{ borderBottom: '1px solid var(--border)' }}
+            >
+              <Layers className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <h3
+                className="text-xs font-semibold uppercase tracking-wider font-mono"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 Top Targeted Dangerous Ports
               </h3>
             </div>
@@ -306,19 +362,29 @@ export const ThreatDetection: React.FC = () => {
                 {summary.top_flagged_ports.map((portItem, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 bg-[#172136] rounded-lg border border-[#2d3548] font-mono text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-lg font-mono text-xs"
+                    style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-cyan-400 font-bold">Port {portItem.port}</span>
+                      <span className="font-bold" style={{ color: 'var(--accent)' }}>
+                        Port {portItem.port}
+                      </span>
                     </div>
-                    <span className="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    <span
+                      className="font-bold px-2 py-0.5 rounded"
+                      style={{
+                        color: '#f59e0b',
+                        background: 'rgba(245,158,11,0.1)',
+                        border: '1px solid rgba(245,158,11,0.2)',
+                      }}
+                    >
                       {portItem.count} hits
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-xs font-mono text-slate-400">
+              <div className="text-center py-8 text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
                 No suspicious destination ports recorded yet.
               </div>
             )}

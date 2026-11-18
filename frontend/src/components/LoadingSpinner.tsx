@@ -25,10 +25,11 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       aria-label="Loading"
     >
       <Loader2
-        className={`${sizeMap[size]} text-cyber-cyan animate-spin transition-all`}
+        className={`${sizeMap[size]} animate-spin transition-all`}
+        style={{ color: 'var(--accent)' }}
       />
       {message && (
-        <p className="mt-3 text-sm font-medium text-slate-400 animate-pulse">
+        <p className="mt-3 text-sm font-medium animate-pulse" style={{ color: 'var(--text-secondary)' }}>
           {message}
         </p>
       )}

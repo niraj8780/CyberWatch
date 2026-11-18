@@ -3,23 +3,110 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-navy-900 text-slate-100 antialiased;
+  /* ── Dark mode (default) ── */
+  :root {
+    --bg-primary:   #050810;
+    --bg-secondary: #080c14;
+    --bg-card:      #0d1117;
+    --bg-card-hover:#111620;
+    --bg-input:     #0d1117;
+    --border:       rgba(0,255,136,0.12);
+    --border-hover: rgba(0,255,136,0.3);
+    --text-primary: #f0fdf4;
+    --text-secondary:#94a3b8;
+    --text-muted:   #4b5563;
+    --accent:       #00ff88;
+    --accent-dim:   rgba(0,255,136,0.15);
+    --accent-glow:  rgba(0,255,136,0.25);
+    --scrollbar-bg: #080c14;
+    --scrollbar-thumb: #1a2235;
   }
 
-  /* Custom scrollbar for dark theme */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  /* ── Light mode ── */
+  .light {
+    --bg-primary:   #f1f5f9;
+    --bg-secondary: #e2e8f0;
+    --bg-card:      #ffffff;
+    --bg-card-hover:#f8fafc;
+    --bg-input:     #ffffff;
+    --border:       rgba(0,150,80,0.15);
+    --border-hover: rgba(0,150,80,0.4);
+    --text-primary: #0f172a;
+    --text-secondary:#475569;
+    --text-muted:   #94a3b8;
+    --accent:       #00994d;
+    --accent-dim:   rgba(0,153,77,0.1);
+    --accent-glow:  rgba(0,153,77,0.2);
+    --scrollbar-bg: #e2e8f0;
+    --scrollbar-thumb: #94a3b8;
   }
-  ::-webkit-scrollbar-track {
-    background: #111827;
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply antialiased transition-colors duration-300;
   }
-  ::-webkit-scrollbar-thumb {
-    background: #2d3548;
-    border-radius: 4px;
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); opacity: 0.6; }
+}
+
+@layer components {
+  /* Card */
+  .cw-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    @apply rounded-xl shadow-card-dark transition-all duration-200;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #3d4558;
+  .cw-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  /* Neon accent text */
+  .text-accent { color: var(--accent); }
+
+  /* Neon border */
+  .border-accent { border-color: var(--border); }
+
+  /* Input */
+  .cw-input {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    @apply rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200;
+  }
+  .cw-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+
+  /* Button primary */
+  .cw-btn {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    @apply rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer;
+  }
+  .cw-btn:hover {
+    background: var(--accent);
+    color: #050810;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+
+  /* Neon glow dot */
+  .neon-dot {
+    @apply h-2 w-2 rounded-full;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent), 0 0 12px var(--accent-glow);
+  }
+
+  /* Section label */
+  .section-label {
+    color: var(--text-muted);
+    @apply text-[10px] font-semibold uppercase tracking-widest;
   }
 }

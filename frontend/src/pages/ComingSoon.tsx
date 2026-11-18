@@ -16,37 +16,67 @@ export const ComingSoon: React.FC<ComingSoonProps> = ({
   return (
     <div className="flex flex-col items-center justify-center min-h-[65vh] text-center px-4">
       <div className="relative mb-6">
-        <div className="h-20 w-20 rounded-2xl bg-[#1e2538] border border-[#2d3548] flex items-center justify-center shadow-xl shadow-cyan-950/20">
-          <Lock className="h-9 w-9 text-cyan-400" />
+        <div
+          className="h-20 w-20 rounded-2xl flex items-center justify-center shadow-xl"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            boxShadow: '0 0 20px var(--accent-glow)',
+          }}
+        >
+          <Lock className="h-9 w-9" style={{ color: 'var(--accent)' }} />
         </div>
-        <div className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-          <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+        <div
+          className="absolute -top-2 -right-2 h-7 w-7 rounded-full flex items-center justify-center"
+          style={{
+            background: 'var(--accent-dim)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <Sparkles className="h-3.5 w-3.5" style={{ color: 'var(--accent)' }} />
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-semibold tracking-wider uppercase mb-3">
+      <div
+        className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold tracking-wider uppercase mb-3"
+        style={{
+          background: 'var(--accent-dim)',
+          border: '1px solid var(--border)',
+          color: 'var(--accent)',
+        }}
+      >
         <Shield className="h-3 w-3" />
         Scheduled Feature &bull; Phase {phase}
       </div>
 
-      <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 tracking-tight">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
         {title}
       </h1>
 
-      <p className="mt-3 text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+      <p className="mt-3 text-sm max-w-md mx-auto leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
         {description}
       </p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-200 hover:text-white hover:border-cyan-500/40 transition-all duration-200"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-secondary)',
+          }}
         >
           Return to Overview
         </Link>
         <Link
           to="/network"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-semibold shadow-lg shadow-cyan-600/20 transition-all duration-200"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold shadow-lg transition-all duration-200"
+          style={{
+            background: 'var(--accent)',
+            color: '#050810',
+            boxShadow: '0 0 15px var(--accent-glow)',
+          }}
         >
           Open Network Monitor
           <ArrowRight className="h-3.5 w-3.5" />

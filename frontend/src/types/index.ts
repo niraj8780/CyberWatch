@@ -334,6 +334,7 @@ export interface AIThreatAnalysis {
   threat_actor_attribution: string;
   containment_checklist: string[];
   suggested_commands: string[];
+  provider?: string;
   generated_at: string;
 }
 

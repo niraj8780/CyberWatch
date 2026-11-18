@@ -39,19 +39,19 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl overflow-hidden shadow-lg">
-        <div className="p-4 border-b border-[#2d3548]">
-          <div className="h-5 w-40 bg-[#2d3548] rounded animate-pulse" />
+      <div className="rounded-xl overflow-hidden shadow-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="h-5 w-40 rounded animate-pulse" style={{ background: 'var(--bg-card-hover)' }} />
         </div>
-        <div className="divide-y divide-[#2d3548]/60">
+        <div>
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="p-4 flex items-center justify-between gap-4 animate-pulse">
-              <div className="h-6 w-16 bg-[#2d3548] rounded" />
-              <div className="h-4 w-36 bg-[#2d3548] rounded" />
-              <div className="h-4 w-36 bg-[#2d3548] rounded" />
-              <div className="h-6 w-24 bg-[#2d3548] rounded" />
-              <div className="h-4 w-28 bg-[#2d3548] rounded" />
-              <div className="h-4 w-12 bg-[#2d3548] rounded" />
+            <div key={i} className="p-4 flex items-center justify-between gap-4 animate-pulse" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div className="h-6 w-16 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+              <div className="h-4 w-36 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+              <div className="h-4 w-36 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+              <div className="h-6 w-24 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+              <div className="h-4 w-28 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+              <div className="h-4 w-12 rounded" style={{ background: 'var(--bg-card-hover)' }} />
             </div>
           ))}
         </div>
@@ -70,11 +70,11 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
   }
 
   return (
-    <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl overflow-hidden shadow-lg flex flex-col">
+    <div className="rounded-xl overflow-hidden shadow-lg flex flex-col" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-[#2d3548] bg-[#111827]/70 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+            <tr className="font-semibold uppercase tracking-wider text-[11px]" style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
               <th scope="col" className="px-4 py-3">Protocol</th>
               <th scope="col" className="px-4 py-3">Local Address</th>
               <th scope="col" className="px-4 py-3">Remote Address</th>
@@ -83,11 +83,14 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
               <th scope="col" className="px-4 py-3 text-right">PID</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#2d3548]/40 font-mono">
+          <tbody className="font-mono">
             {connections.map((conn, index) => (
               <tr
                 key={`${conn.local_ip}-${conn.local_port}-${conn.remote_ip}-${conn.remote_port}-${conn.pid}-${index}`}
-                className="hover:bg-[#242b3d]/80 transition-colors duration-150 odd:bg-transparent even:bg-[#111827]/30"
+                className="transition-colors duration-150"
+                style={{ borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 {/* Protocol */}
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -95,18 +98,18 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
                 </td>
 
                 {/* Local Address */}
-                <td className="px-4 py-3 whitespace-nowrap text-slate-200">
-                  <span className="text-cyan-400 font-medium">
+                <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+                  <span style={{ color: 'var(--accent)' }} className="font-medium">
                     {formatAddress(conn.local_ip, conn.local_port)}
                   </span>
                 </td>
 
                 {/* Remote Address */}
-                <td className="px-4 py-3 whitespace-nowrap text-slate-300">
+                <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
                   {conn.remote_ip || conn.remote_port ? (
                     <span>{formatAddress(conn.remote_ip, conn.remote_port)}</span>
                   ) : (
-                    <span className="text-slate-500 font-sans italic">none</span>
+                    <span className="font-sans italic" style={{ color: 'var(--text-muted)' }}>none</span>
                   )}
                 </td>
 
@@ -116,26 +119,26 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
                 </td>
 
                 {/* Process */}
-                <td className="px-4 py-3 whitespace-nowrap font-sans font-medium text-slate-300">
+                <td className="px-4 py-3 whitespace-nowrap font-sans font-medium" style={{ color: 'var(--text-secondary)' }}>
                   {conn.process_name ? (
-                    <span className="inline-flex items-center gap-1.5 text-slate-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span className="inline-flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
                       {conn.process_name}
                     </span>
                   ) : (
-                    <span className="text-slate-500 italic">Unknown</span>
+                    <span className="italic" style={{ color: 'var(--text-muted)' }}>Unknown</span>
                   )}
                 </td>
 
                 {/* PID */}
                 <td className="px-4 py-3 whitespace-nowrap text-right">
                   {conn.pid !== null ? (
-                    <span className="inline-flex items-center gap-0.5 text-slate-400 bg-[#242b3d] px-2 py-0.5 rounded border border-[#2d3548] text-[11px]">
-                      <Hash className="h-3 w-3 text-slate-500" />
+                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px]" style={{ color: 'var(--text-secondary)', background: 'var(--bg-card-hover)', border: '1px solid var(--border)' }}>
+                      <Hash className="h-3 w-3" style={{ color: 'var(--text-muted)' }} />
                       {conn.pid}
                     </span>
                   ) : (
-                    <span className="text-slate-600">—</span>
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
                   )}
                 </td>
               </tr>
@@ -145,35 +148,37 @@ export const ConnectionTable: React.FC<ConnectionTableProps> = ({
       </div>
 
       {showPagination && totalPages > 1 && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-[#2d3548] bg-[#111827]/40 text-xs text-slate-400">
+        <div className="flex items-center justify-between px-4 py-3 text-xs" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
           <div>
             Showing{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {(currentPage - 1) * pageSize + 1}
             </span>{' '}
             to{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {Math.min(currentPage * pageSize, totalCount)}
             </span>{' '}
-            of <span className="font-semibold text-slate-200">{totalCount}</span> entries
+            of <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{totalCount}</span> entries
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="p-1.5 rounded-lg border border-[#2d3548] bg-[#1e2538] text-slate-300 hover:text-white hover:border-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
               aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="px-2 font-mono font-medium text-slate-300">
+            <span className="px-2 font-mono font-medium" style={{ color: 'var(--text-secondary)' }}>
               {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="p-1.5 rounded-lg border border-[#2d3548] bg-[#1e2538] text-slate-300 hover:text-white hover:border-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
               aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />

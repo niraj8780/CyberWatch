@@ -26,26 +26,29 @@ export const DetectionRuleManager: React.FC<DetectionRuleManagerProps> = ({
   };
 
   return (
-    <div className="bg-[#111827] border border-[#2d3548] rounded-xl overflow-hidden shadow-lg">
-      <div className="p-4 border-b border-[#2d3548] bg-[#0e1422] flex items-center justify-between">
+    <div className="rounded-xl overflow-hidden shadow-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+      <div
+        className="p-4 flex items-center justify-between"
+        style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+      >
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-cyan-400" />
-          <h2 className="text-sm font-semibold text-slate-200">
+          <Sliders className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Modular Detection Rules ({rules.filter((r) => r.enabled).length}/{rules.length} Active)
           </h2>
         </div>
-        <span className="text-xs font-mono text-slate-400">
+        <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
           SOC Heuristic Engines
         </span>
       </div>
 
-      <div className="divide-y divide-[#1e293b]">
+      <div>
         {isLoading ? (
-          <div className="p-8 text-center text-xs font-mono text-slate-400">
+          <div className="p-8 text-center text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
             Loading rule configurations...
           </div>
         ) : rules.length === 0 ? (
-          <div className="p-8 text-center text-xs font-mono text-slate-400">
+          <div className="p-8 text-center text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>
             No detection rules found.
           </div>
         ) : (
@@ -54,22 +57,28 @@ export const DetectionRuleManager: React.FC<DetectionRuleManagerProps> = ({
             return (
               <div
                 key={rule.id}
-                className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#152033] transition"
+                className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition"
+                style={{ borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="font-mono text-xs text-slate-400 bg-[#172136] border border-[#2d3548] px-2 py-0.5 rounded">
+                    <span
+                      className="font-mono text-xs px-2 py-0.5 rounded"
+                      style={{ color: 'var(--text-secondary)', background: 'var(--bg-card-hover)', border: '1px solid var(--border)' }}
+                    >
                       {rule.id}
                     </span>
-                    <h3 className="text-xs font-semibold text-slate-200">
+                    <h3 className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {rule.name}
                     </h3>
                     <SeverityBadge severity={rule.severity} size="sm" />
-                    <span className="text-[10px] font-mono uppercase text-cyan-400">
+                    <span className="text-[10px] font-mono uppercase" style={{ color: 'var(--accent)' }}>
                       {rule.category}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                  <p className="text-xs leading-relaxed max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
                     {rule.description}
                   </p>
                 </div>
@@ -77,8 +86,9 @@ export const DetectionRuleManager: React.FC<DetectionRuleManagerProps> = ({
                 <div className="flex items-center gap-3 select-none flex-shrink-0">
                   <span
                     className={`inline-flex items-center gap-1 font-mono text-[11px] ${
-                      rule.enabled ? 'text-emerald-400' : 'text-slate-500'
+                      rule.enabled ? 'text-emerald-400' : ''
                     }`}
+                    style={!rule.enabled ? { color: 'var(--text-muted)' } : {}}
                   >
                     {rule.enabled ? (
                       <>
@@ -97,9 +107,11 @@ export const DetectionRuleManager: React.FC<DetectionRuleManagerProps> = ({
                   <button
                     onClick={() => handleToggle(rule.id, rule.enabled)}
                     disabled={isToggling}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 ${
-                      rule.enabled ? 'bg-cyan-600' : 'bg-slate-700'
-                    }`}
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 disabled:opacity-50"
+                    style={{
+                      background: rule.enabled ? 'var(--accent)' : 'var(--bg-card-hover)',
+                      border: '1px solid var(--border)',
+                    }}
                     aria-label={`Toggle ${rule.name}`}
                   >
                     <span

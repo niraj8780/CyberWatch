@@ -1,7 +1,7 @@
 import React from 'react';
 import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-export type KPICardColor = 'cyan' | 'red' | 'amber' | 'emerald' | 'blue' | 'purple';
+export type KPICardColor = 'green' | 'emerald' | 'red' | 'amber' | 'blue' | 'purple' | 'cyan';
 
 interface KPICardProps {
   title: string;
@@ -14,6 +14,16 @@ interface KPICardProps {
   loading?: boolean;
 }
 
+const colorMap: Record<KPICardColor, { hex: string; glow: string }> = {
+  green:   { hex: 'var(--accent)', glow: 'var(--accent-glow)' },
+  emerald: { hex: 'var(--accent)', glow: 'var(--accent-glow)' },
+  red:     { hex: '#ef4444',       glow: 'rgba(239,68,68,0.25)' },
+  amber:   { hex: '#f59e0b',       glow: 'rgba(245,158,11,0.25)' },
+  blue:    { hex: '#3b82f6',       glow: 'rgba(59,130,246,0.25)' },
+  purple:  { hex: '#a855f7',       glow: 'rgba(168,85,247,0.25)' },
+  cyan:    { hex: '#22d3ee',       glow: 'rgba(34,211,238,0.25)' },
+};
+
 export const KPICard: React.FC<KPICardProps> = ({
   title,
   value,
@@ -21,103 +31,81 @@ export const KPICard: React.FC<KPICardProps> = ({
   icon: Icon,
   trend,
   trendValue,
-  color = 'cyan',
+  color = 'green',
   loading = false,
 }) => {
-  const colorStyles: Record<
-    KPICardColor,
-    { iconBg: string; iconColor: string; borderGlow: string }
-  > = {
-    cyan: {
-      iconBg: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
-      iconColor: 'text-cyan-400',
-      borderGlow: 'hover:border-cyan-500/40 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]',
-    },
-    red: {
-      iconBg: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
-      iconColor: 'text-rose-400',
-      borderGlow: 'hover:border-rose-500/40 hover:shadow-[0_0_15px_rgba(244,63,94,0.15)]',
-    },
-    amber: {
-      iconBg: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-      iconColor: 'text-amber-400',
-      borderGlow: 'hover:border-amber-500/40 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)]',
-    },
-    emerald: {
-      iconBg: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-      iconColor: 'text-emerald-400',
-      borderGlow: 'hover:border-emerald-500/40 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)]',
-    },
-    blue: {
-      iconBg: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-      iconColor: 'text-blue-400',
-      borderGlow: 'hover:border-blue-500/40 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]',
-    },
-    purple: {
-      iconBg: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
-      iconColor: 'text-purple-400',
-      borderGlow: 'hover:border-purple-500/40 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]',
-    },
-  };
-
-  const selectedColor = colorStyles[color] || colorStyles.cyan;
+  const c = colorMap[color] || colorMap.green;
 
   if (loading) {
     return (
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg animate-pulse">
+      <div
+        className="rounded-xl p-5 animate-pulse"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
         <div className="flex items-center justify-between">
-          <div className="h-4 w-24 bg-[#2d3548] rounded" />
-          <div className="h-10 w-10 bg-[#2d3548] rounded-lg" />
+          <div className="h-3 w-24 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+          <div className="h-10 w-10 rounded-lg" style={{ background: 'var(--bg-card-hover)' }} />
         </div>
-        <div className="mt-4 h-8 w-20 bg-[#2d3548] rounded" />
-        <div className="mt-2 h-3 w-32 bg-[#2d3548] rounded" />
+        <div className="mt-4 h-8 w-20 rounded" style={{ background: 'var(--bg-card-hover)' }} />
+        <div className="mt-2 h-3 w-32 rounded" style={{ background: 'var(--bg-card-hover)' }} />
       </div>
     );
   }
 
   return (
     <div
-      className={`bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg transition-all duration-200 ${selectedColor.borderGlow} flex flex-col justify-between`}
+      className="rounded-xl p-5 transition-all duration-200 flex flex-col justify-between cursor-default group"
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = c.hex;
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 20px ${c.glow}`;
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+      }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+        <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>
           {title}
         </span>
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-lg ${selectedColor.iconBg}`}
+          className="flex h-10 w-10 items-center justify-center rounded-lg"
+          style={{ background: `${c.hex}18`, border: `1px solid ${c.hex}40` }}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5" style={{ color: c.hex }} />
         </div>
       </div>
 
       <div className="mt-3">
-        <div className="text-2xl font-bold tracking-tight text-slate-100 font-mono">
+        <div className="text-2xl font-bold tracking-tight font-mono" style={{ color: 'var(--text-primary)' }}>
           {value}
         </div>
-
         <div className="mt-2 flex items-center justify-between text-xs">
           {subtitle && (
-            <span className="text-slate-400 truncate max-w-[70%]">
+            <span className="truncate max-w-[70%]" style={{ color: 'var(--text-secondary)' }}>
               {subtitle}
             </span>
           )}
-
           {trend && (
             <div className="flex items-center gap-1 ml-auto">
               {trend === 'up' && (
-                <span className="flex items-center text-emerald-400 font-medium">
+                <span className="flex items-center font-medium" style={{ color: 'var(--accent)' }}>
                   <TrendingUp className="h-3.5 w-3.5 mr-0.5" />
                   {trendValue || 'Up'}
                 </span>
               )}
               {trend === 'down' && (
-                <span className="flex items-center text-rose-400 font-medium">
+                <span className="flex items-center font-medium" style={{ color: '#ef4444' }}>
                   <TrendingDown className="h-3.5 w-3.5 mr-0.5" />
                   {trendValue || 'Down'}
                 </span>
               )}
               {trend === 'neutral' && (
-                <span className="flex items-center text-slate-400 font-medium">
+                <span className="flex items-center font-medium" style={{ color: 'var(--text-muted)' }}>
                   <Minus className="h-3.5 w-3.5 mr-0.5" />
                   {trendValue || 'Stable'}
                 </span>

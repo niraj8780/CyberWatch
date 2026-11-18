@@ -123,13 +123,19 @@ export const NetworkMonitor: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#2d3548]">
+      <div
+        className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <div>
-          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
-            <Network className="h-5 w-5 text-cyan-400" />
+          <h1
+            className="text-xl font-bold flex items-center gap-2.5"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Network className="h-5 w-5" style={{ color: 'var(--accent)' }} />
             Live Network Monitor
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
             Real-time socket inspection, packet states, and endpoint connection mapping.
           </p>
         </div>
@@ -137,11 +143,20 @@ export const NetworkMonitor: React.FC = () => {
         <div className="flex items-center gap-3 self-start md:self-auto">
           {/* WebSocket Live Telemetry Indicator */}
           {isLive && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-emerald-500/30 text-emerald-400 font-mono text-xs">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-xs"
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid rgba(16,185,129,0.3)',
+                color: '#10b981',
+              }}
+            >
               <Radio className="h-3.5 w-3.5 animate-pulse" />
               <span>WS Stream Active</span>
               {deltaStats.newCount > 0 && (
-                <span className="text-[10px] text-emerald-300">+{deltaStats.newCount}</span>
+                <span className="text-[10px]" style={{ color: '#6ee7b7' }}>
+                  +{deltaStats.newCount}
+                </span>
               )}
             </div>
           )}
@@ -150,11 +165,12 @@ export const NetworkMonitor: React.FC = () => {
           {isLive && (
             <button
               onClick={togglePause}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 ${
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
+              style={
                 isPaused
-                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
-                  : 'bg-[#1e2538] text-slate-300 border-[#2d3548] hover:text-white hover:border-cyan-500/50'
-              }`}
+                  ? { background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }
+                  : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }
+              }
             >
               {isPaused ? (
                 <>
@@ -173,11 +189,12 @@ export const NetworkMonitor: React.FC = () => {
           {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+            style={
               autoRefresh
-                ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-400'
-                : 'bg-[#1e2538] border-[#2d3548] text-slate-400 hover:text-slate-200'
-            }`}
+                ? { background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)' }
+                : { background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }
+            }
           >
             <Activity className="h-3.5 w-3.5" />
             {autoRefresh ? 'Live Poll: ON' : 'Live Poll: OFF'}
@@ -186,7 +203,12 @@ export const NetworkMonitor: React.FC = () => {
           {/* Manual Refresh */}
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -195,11 +217,14 @@ export const NetworkMonitor: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-4 shadow-md space-y-4">
+      <div
+        className="rounded-xl p-4 shadow-md space-y-4"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }} />
             <input
               type="text"
               value={searchQuery}
@@ -208,15 +233,26 @@ export const NetworkMonitor: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search process name, PID, or IP address (e.g. chrome, 8000, 127.0.0.1)..."
-              className="w-full pl-9 pr-4 py-2 bg-[#111827] border border-[#2d3548] rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 font-mono transition-colors"
+              className="w-full pl-9 pr-4 py-2 rounded-lg text-xs placeholder-slate-500 focus:outline-none font-mono transition-colors"
+              style={{
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
 
           {/* Quick Filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             {/* Protocol Selector */}
-            <div className="flex items-center bg-[#111827] border border-[#2d3548] rounded-lg p-1 text-xs">
-              <span className="text-[10px] text-slate-500 uppercase px-2 font-semibold">
+            <div
+              className="flex items-center rounded-lg p-1 text-xs"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+            >
+              <span
+                className="text-[10px] uppercase px-2 font-semibold"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 Proto
               </span>
               {['ALL', 'TCP', 'UDP'].map((proto) => (
@@ -226,11 +262,12 @@ export const NetworkMonitor: React.FC = () => {
                     setSelectedProtocol(proto);
                     setCurrentPage(1);
                   }}
-                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                  className="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                  style={
                     selectedProtocol === proto
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
+                      ? { background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--border-hover)' }
+                      : { color: 'var(--text-secondary)' }
+                  }
                 >
                   {proto}
                 </button>
@@ -238,8 +275,14 @@ export const NetworkMonitor: React.FC = () => {
             </div>
 
             {/* Status Selector */}
-            <div className="flex items-center bg-[#111827] border border-[#2d3548] rounded-lg p-1 text-xs">
-              <span className="text-[10px] text-slate-500 uppercase px-2 font-semibold">
+            <div
+              className="flex items-center rounded-lg p-1 text-xs"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+            >
+              <span
+                className="text-[10px] uppercase px-2 font-semibold"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 State
               </span>
               {['ALL', 'ESTABLISHED', 'LISTEN', 'TIME_WAIT'].map((st) => (
@@ -249,11 +292,12 @@ export const NetworkMonitor: React.FC = () => {
                     setSelectedStatus(st);
                     setCurrentPage(1);
                   }}
-                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                  className="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                  style={
                     selectedStatus === st
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
+                      ? { background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--border-hover)' }
+                      : { color: 'var(--text-secondary)' }
+                  }
                 >
                   {st}
                 </button>
@@ -264,7 +308,8 @@ export const NetworkMonitor: React.FC = () => {
             {(selectedProtocol !== 'ALL' || selectedStatus !== 'ALL' || searchQuery) && (
               <button
                 onClick={handleResetFilters}
-                className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] border border-transparent hover:border-[#2d3548] transition-all"
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-transparent transition-all"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Reset
               </button>
@@ -273,28 +318,39 @@ export const NetworkMonitor: React.FC = () => {
         </div>
 
         {/* Filter Stats Metric Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 border-t border-[#2d3548]/60 text-xs">
+        <div
+          className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 text-xs"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">Matched Sockets:</span>
-            <span className="font-mono font-semibold text-slate-200">{stats.total}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Matched Sockets:</span>
+            <span className="font-mono font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {stats.total}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">TCP Streams:</span>
-            <span className="font-mono font-semibold text-blue-400">{stats.tcp}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>TCP Streams:</span>
+            <span className="font-mono font-semibold" style={{ color: '#3b82f6' }}>
+              {stats.tcp}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">UDP Sockets:</span>
-            <span className="font-mono font-semibold text-purple-400">{stats.udp}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>UDP Sockets:</span>
+            <span className="font-mono font-semibold" style={{ color: '#a855f7' }}>
+              {stats.udp}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">Established:</span>
-            <span className="font-mono font-semibold text-emerald-400">
+            <span style={{ color: 'var(--text-secondary)' }}>Established:</span>
+            <span className="font-mono font-semibold" style={{ color: '#10b981' }}>
               {stats.established}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">Listeners:</span>
-            <span className="font-mono font-semibold text-cyan-400">{stats.listening}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Listeners:</span>
+            <span className="font-mono font-semibold" style={{ color: 'var(--accent)' }}>
+              {stats.listening}
+            </span>
           </div>
         </div>
       </div>

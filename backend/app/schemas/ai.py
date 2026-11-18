@@ -27,6 +27,7 @@ class AIThreatAnalysisRequest(BaseModel):
     pid: int | None = None
     evidence: dict[str, Any] = Field(default_factory=dict)
     api_key: str | None = None
+    model: str | None = "gemini-1.5-flash"
 
 
 class AIThreatAnalysisResponse(BaseModel):
@@ -64,6 +65,7 @@ class AIChatRequest(BaseModel):
     history: list[AIChatMessage] = Field(default_factory=list)
     context: dict[str, Any] | None = None
     api_key: str | None = None
+    model: str | None = "gemini-1.5-flash"
 
 
 class AIChatResponse(BaseModel):
@@ -72,7 +74,6 @@ class AIChatResponse(BaseModel):
     reply: str
     suggested_followups: list[str] = Field(default_factory=list)
     provider: str = "CyberWatch SOC Intelligence"
-    timestamp: str
     timestamp: str
 
     model_config = ConfigDict(from_attributes=True)

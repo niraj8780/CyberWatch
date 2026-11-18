@@ -3,7 +3,6 @@ import {
   Search,
   Filter,
   ShieldAlert,
-  ArrowRight,
   ExternalLink,
   ChevronLeft,
   ChevronRight,
@@ -49,11 +48,14 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
   );
 
   return (
-    <div className="bg-[#111827] border border-[#2d3548] rounded-xl overflow-hidden shadow-lg">
+    <div className="rounded-xl overflow-hidden shadow-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       {/* Table Filter Controls */}
-      <div className="p-4 border-b border-[#2d3548] flex flex-col sm:flex-row gap-3 items-center justify-between bg-[#0e1422]">
+      <div
+        className="p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
+        style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+      >
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4" style={{ color: 'var(--text-secondary)' }} />
           <input
             type="text"
             placeholder="Search threats, processes, IPs..."
@@ -62,20 +64,34 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-9 pr-3 py-1.5 bg-[#172136] border border-[#2d3548] rounded-lg text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition font-mono"
+            className="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs placeholder-slate-400 focus:outline-none transition font-mono"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-400 font-mono">Severity:</span>
+          <Filter className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
+          <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>Severity:</span>
           <select
             value={severityFilter}
             onChange={(e) => {
               setSeverityFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="bg-[#172136] border border-[#2d3548] rounded-lg text-xs text-slate-200 py-1.5 px-3 focus:outline-none focus:border-cyan-500 font-mono transition"
+            className="rounded-lg text-xs py-1.5 px-3 focus:outline-none font-mono transition"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
             <option value="all">All Severities</option>
             <option value="high">High Severity</option>
@@ -89,7 +105,10 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-[#2d3548] bg-[#0c121e] text-[11px] font-mono uppercase text-slate-400 select-none">
+            <tr
+              className="text-[11px] font-mono uppercase select-none"
+              style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+            >
               <th className="py-3 px-4">Time</th>
               <th className="py-3 px-4">Severity</th>
               <th className="py-3 px-4">Rule / Threat</th>
@@ -99,10 +118,10 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
               <th className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1e293b]">
+          <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan={7} className="text-center py-10 font-mono" style={{ color: 'var(--text-secondary)' }}>
                   Loading detected security events...
                 </td>
               </tr>
@@ -110,9 +129,9 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
               <tr>
                 <td colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <ShieldAlert className="w-8 h-8 text-slate-600" />
-                    <span className="text-sm text-slate-300 font-medium">No Threats Detected</span>
-                    <span className="text-xs text-slate-500 max-w-sm">
+                    <ShieldAlert className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No Threats Detected</span>
+                    <span className="text-xs max-w-sm" style={{ color: 'var(--text-muted)' }}>
                       {searchTerm || severityFilter !== 'all'
                         ? 'No events match your current filter parameters.'
                         : 'Active heuristics report no anomalous socket activity or signature matches on monitored interfaces.'}
@@ -127,40 +146,48 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
                   <tr
                     key={evt.id}
                     onClick={() => onSelectEvent(evt)}
-                    className="hover:bg-[#152033] cursor-pointer transition group"
+                    className="cursor-pointer transition group"
+                    style={{ borderBottom: '1px solid var(--border)' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    <td className="py-3 px-4 font-mono text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 font-mono whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
                       {new Date(evt.timestamp).toLocaleTimeString()}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       <SeverityBadge severity={evt.severity} size="sm" />
                     </td>
                     <td className="py-3 px-4 max-w-xs">
-                      <div className="font-medium text-slate-200 group-hover:text-cyan-300 transition truncate">
+                      <div
+                        className="font-medium transition truncate"
+                        style={{ color: 'var(--text-primary)' }}
+                        onMouseEnter={e => ((e.currentTarget as HTMLDivElement).style.color = 'var(--accent)')}
+                        onMouseLeave={e => ((e.currentTarget as HTMLDivElement).style.color = 'var(--text-primary)')}
+                      >
                         {evt.title}
                       </div>
-                      <div className="text-[10px] font-mono text-slate-400">
+                      <div className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
                         {evt.rule_id} • {evt.detection_type}
                       </div>
                     </td>
                     <td className="py-3 px-4 font-mono whitespace-nowrap">
-                      <span className="text-slate-200 font-medium">{evt.process_name || 'System'}</span>
-                      {evt.pid && <span className="text-slate-500 ml-1">({evt.pid})</span>}
+                      <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{evt.process_name || 'System'}</span>
+                      {evt.pid && <span className="ml-1" style={{ color: 'var(--text-muted)' }}>({evt.pid})</span>}
                     </td>
                     <td className="py-3 px-4 font-mono whitespace-nowrap">
                       {evt.dest_ip ? (
-                        <div className="flex items-center gap-1 text-slate-300">
+                        <div className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                           <span>{evt.dest_ip}</span>
                           {evt.dest_port && (
                             <span className="text-rose-400 font-bold">:{evt.dest_port}</span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-500">Inbound / Listening</span>
+                        <span style={{ color: 'var(--text-muted)' }}>Inbound / Listening</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <span className="font-mono text-cyan-400 font-semibold">{confPercent}%</span>
+                      <span className="font-mono font-semibold" style={{ color: 'var(--accent)' }}>{confPercent}%</span>
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <button
@@ -168,7 +195,16 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
                           e.stopPropagation();
                           onSelectEvent(evt);
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#1e293b] hover:bg-cyan-600 hover:text-white text-slate-300 font-mono text-[11px] transition"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded font-mono text-[11px] transition"
+                        style={{ background: 'var(--bg-card-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent)';
+                          (e.currentTarget as HTMLButtonElement).style.color = '#000';
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card-hover)';
+                          (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+                        }}
                       >
                         <span>Inspect</span>
                         <ExternalLink className="w-3 h-3" />
@@ -184,7 +220,10 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
 
       {/* Pagination Footer */}
       {filteredEvents.length > itemsPerPage && (
-        <div className="p-3 border-t border-[#2d3548] flex items-center justify-between text-xs text-slate-400 bg-[#0e1422] font-mono">
+        <div
+          className="p-3 flex items-center justify-between text-xs font-mono"
+          style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+        >
           <span>
             Showing {(currentPage - 1) * itemsPerPage + 1}–
             {Math.min(currentPage * itemsPerPage, filteredEvents.length)} of {filteredEvents.length}{' '}
@@ -194,7 +233,8 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
             <button
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="p-1.5 rounded border border-[#2d3548] bg-[#172136] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#22304d] text-slate-200 transition"
+              className="p-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed transition"
+              style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
               aria-label="Previous Page"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -205,7 +245,8 @@ export const SecurityEventTable: React.FC<SecurityEventTableProps> = ({
             <button
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="p-1.5 rounded border border-[#2d3548] bg-[#172136] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#22304d] text-slate-200 transition"
+              className="p-1.5 rounded disabled:opacity-40 disabled:cursor-not-allowed transition"
+              style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
               aria-label="Next Page"
             >
               <ChevronRight className="w-4 h-4" />

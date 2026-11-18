@@ -22,7 +22,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       <h3 className="text-base font-semibold text-red-200">
         Monitoring Service Error
       </h3>
-      <p className="mt-2 text-sm text-slate-400 max-w-md mx-auto">
+      <p className="mt-2 text-sm max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
         {message || 'Unable to connect to the CyberWatch telemetry service.'}
       </p>
       {onRetry && (

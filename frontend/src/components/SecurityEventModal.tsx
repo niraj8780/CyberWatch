@@ -35,26 +35,33 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
       <div
-        className="bg-[#0f172a] border border-[#334155] rounded-xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="rounded-xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-[#1e293b] flex items-center justify-between bg-[#111c33]/70">
+        <div
+          className="px-6 py-4 flex items-center justify-between"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+        >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <div
+              className="p-2 rounded-lg"
+              style={{ background: 'var(--accent-dim)', border: '1px solid var(--border)', color: 'var(--accent)' }}
+            >
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-slate-400 tracking-wider">
+                <span className="font-mono text-xs tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   {event.rule_id}
                 </span>
-                <span className="text-slate-600">•</span>
-                <span className="text-xs font-mono text-cyan-400 uppercase">
+                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                <span className="text-xs font-mono uppercase" style={{ color: 'var(--accent)' }}>
                   {event.detection_type}
                 </span>
               </div>
-              <h2 className="text-base font-semibold text-slate-100 mt-0.5">
+              <h2 className="text-base font-semibold mt-0.5" style={{ color: 'var(--text-primary)' }}>
                 {event.title}
               </h2>
             </div>
@@ -63,7 +70,16 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
             <SeverityBadge severity={event.severity} size="md" />
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+              className="p-1.5 rounded-lg transition"
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card-hover)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              }}
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -74,78 +90,84 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
         {/* Modal Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
           {/* Key Context Metrics Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[#131d33] border border-[#223254] rounded-lg p-3">
+          <div
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 rounded-lg p-3"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+          >
             <div>
-              <span className="text-[11px] font-mono uppercase text-slate-400 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-[11px] font-mono uppercase flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                <Clock className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                 Detected Time
               </span>
-              <p className="font-mono text-xs text-slate-200 mt-1">
+              <p className="font-mono text-xs mt-1" style={{ color: 'var(--text-primary)' }}>
                 {new Date(event.timestamp).toLocaleTimeString()}
               </p>
-              <p className="text-[10px] text-slate-400 font-mono">
+              <p className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
                 {new Date(event.timestamp).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono uppercase text-slate-400 flex items-center gap-1">
-                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-[11px] font-mono uppercase flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                <Cpu className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                 Process / PID
               </span>
-              <p className="font-mono text-xs text-slate-200 mt-1 truncate">
+              <p className="font-mono text-xs mt-1 truncate" style={{ color: 'var(--text-primary)' }}>
                 {event.process_name || 'System / Unattributed'}
               </p>
-              <p className="text-[10px] text-slate-400 font-mono">
+              <p className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
                 PID: {event.pid ?? 'N/A'}
               </p>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono uppercase text-slate-400">
+              <span className="text-[11px] font-mono uppercase" style={{ color: 'var(--text-secondary)' }}>
                 Confidence Rating
               </span>
               <div className="flex items-center gap-2 mt-1">
-                <div className="w-16 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div className="w-16 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border)' }}>
                   <div
-                    className="h-full bg-cyan-400 rounded-full"
-                    style={{ width: formattedConfidence }}
+                    className="h-full rounded-full"
+                    style={{ width: formattedConfidence, background: 'var(--accent)' }}
                   />
                 </div>
-                <span className="font-mono text-xs text-cyan-300 font-semibold">
+                <span className="font-mono text-xs font-semibold" style={{ color: 'var(--accent)' }}>
                   {formattedConfidence}
                 </span>
               </div>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono uppercase text-slate-400">
+              <span className="text-[11px] font-mono uppercase" style={{ color: 'var(--text-secondary)' }}>
                 Transport Protocol
               </span>
-              <p className="font-mono text-xs text-slate-200 mt-1">
+              <p className="font-mono text-xs mt-1" style={{ color: 'var(--text-primary)' }}>
                 {(event.protocol || 'TCP').toUpperCase()}
               </p>
-              <p className="text-[10px] text-slate-400 font-mono">
+              <p className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>
                 ID: {event.id}
               </p>
             </div>
           </div>
 
           {/* Network Socket Trajectory */}
-          <div className="bg-[#131d33] border border-[#223254] rounded-lg p-3">
-            <span className="text-[11px] font-mono uppercase text-slate-400 block mb-2">
+          <div className="rounded-lg p-3" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+            <span className="text-[11px] font-mono uppercase block mb-2" style={{ color: 'var(--text-secondary)' }}>
               Network Trajectory
             </span>
-            <div className="flex items-center justify-between font-mono text-xs bg-[#0b101e] px-4 py-2.5 rounded border border-[#1b2640]">
+            <div
+              className="flex items-center justify-between font-mono text-xs px-4 py-2.5 rounded"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
               <div className="flex flex-col">
-                <span className="text-[10px] text-slate-400">SOURCE</span>
-                <span className="text-slate-200 font-medium">
+                <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>SOURCE</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {event.source_ip || '*'}:{event.source_port || '*'}
                 </span>
               </div>
-              <ArrowRight className="w-4 h-4 text-cyan-400 mx-2" />
+              <ArrowRight className="w-4 h-4 mx-2" style={{ color: 'var(--accent)' }} />
               <div className="flex flex-col text-right">
-                <span className="text-[10px] text-slate-400">DESTINATION</span>
+                <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>DESTINATION</span>
                 <span className="text-rose-300 font-medium">
                   {event.dest_ip || '*'}:{event.dest_port || '*'}
                 </span>
@@ -155,11 +177,14 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
 
           {/* Threat Explanation */}
           <div>
-            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-              <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-              Threat Description & Analysis
+            <h3 className="text-xs font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+              <Terminal className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
+              Threat Description &amp; Analysis
             </h3>
-            <div className="bg-[#131d33] border border-[#223254] rounded-lg p-3.5 text-slate-300 leading-relaxed text-xs">
+            <div
+              className="rounded-lg p-3.5 leading-relaxed text-xs"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+            >
               {event.description}
             </div>
           </div>
@@ -167,11 +192,14 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
           {/* Technical Evidence Payload */}
           {event.evidence && Object.keys(event.evidence).length > 0 && (
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                <FileCode className="w-3.5 h-3.5 text-cyan-400" />
+              <h3 className="text-xs font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <FileCode className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                 Technical Evidence
               </h3>
-              <div className="bg-[#090d16] border border-[#1b2640] rounded-lg p-3 font-mono text-[11px] text-emerald-400 overflow-x-auto max-h-40">
+              <div
+                className="rounded-lg p-3 font-mono text-[11px] text-emerald-400 overflow-x-auto max-h-40"
+                style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+              >
                 <pre>{JSON.stringify(event.evidence, null, 2)}</pre>
               </div>
             </div>
@@ -180,17 +208,21 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
           {/* SOC Recommended Investigation Checklist */}
           {event.recommendations && event.recommendations.length > 0 && (
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+              <h3 className="text-xs font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                 Recommended SOC Remediation Checklist
               </h3>
               <div className="space-y-2">
                 {event.recommendations.map((step, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-2.5 bg-[#131d33] border border-[#223254] rounded-lg p-3 text-xs text-slate-300"
+                    className="flex items-start gap-2.5 rounded-lg p-3 text-xs"
+                    style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
                   >
-                    <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">
+                    <span
+                      className="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full font-mono text-[10px] font-bold"
+                      style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}
+                    >
                       {idx + 1}
                     </span>
                     <span className="leading-snug pt-0.5">{step}</span>
@@ -202,10 +234,22 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3 border-t border-[#1e293b] flex items-center justify-between bg-[#111c33]/70">
+        <div
+          className="px-6 py-3 flex items-center justify-between"
+          style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+        >
           <button
             onClick={handleCopyJson}
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-300 hover:text-slate-100 bg-[#1e293b] hover:bg-[#334155] px-3 py-1.5 rounded-lg border border-[#334155] transition"
+            className="inline-flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-lg transition"
+            style={{ color: 'var(--text-secondary)', background: 'var(--bg-card-hover)', border: '1px solid var(--border)' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-hover)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
+            }}
           >
             {copied ? (
               <>
@@ -214,7 +258,7 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 text-slate-400" />
+                <Copy className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
                 <span>Copy Event JSON</span>
               </>
             )}
@@ -222,7 +266,10 @@ export const SecurityEventModal: React.FC<SecurityEventModalProps> = ({ event, o
 
           <button
             onClick={onClose}
-            className="text-xs font-medium text-slate-200 bg-cyan-600 hover:bg-cyan-500 px-4 py-1.5 rounded-lg transition"
+            className="text-xs font-medium px-4 py-1.5 rounded-lg transition"
+            style={{ background: 'var(--accent)', color: '#000', fontWeight: 600 }}
+            onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.85')}
+            onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
           >
             Dismiss
           </button>

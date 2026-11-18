@@ -14,14 +14,18 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
   deltaStats,
 }) => {
   return (
-    <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-5 shadow-lg flex flex-col h-full">
+    <div
+      className="rounded-xl p-5 shadow-lg flex flex-col h-full"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 border-b border-[#2d3548] pb-3">
+      <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2">
           <Radio
-            className={`h-4 w-4 ${isLive ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`}
+            className={`h-4 w-4 ${isLive ? 'animate-pulse' : ''}`}
+            style={{ color: isLive ? '#34d399' : 'var(--text-muted)' }}
           />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+          <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
             Real-Time Socket Stream
           </h3>
         </div>
@@ -29,17 +33,18 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
         <div className="flex items-center gap-2">
           {deltaStats && (
             <div className="flex items-center gap-2 text-[10px] font-mono">
-              <span className="text-emerald-400">+{deltaStats.newCount} new</span>
-              <span className="text-slate-600">/</span>
+              <span style={{ color: '#34d399' }}>+{deltaStats.newCount} new</span>
+              <span style={{ color: 'var(--text-muted)' }}>/</span>
               <span className="text-amber-400">-{deltaStats.closedCount} closed</span>
             </div>
           )}
           <span
-            className={`px-1.5 py-0.5 text-[9px] font-mono rounded font-semibold uppercase tracking-wider ${
+            className="px-1.5 py-0.5 text-[9px] font-mono rounded font-semibold uppercase tracking-wider"
+            style={
               isLive
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'bg-slate-800 text-slate-400 border border-slate-700'
-            }`}
+                ? { background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--border)' }
+                : { background: 'var(--bg-card-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+            }
           >
             {isLive ? 'LIVE' : 'OFFLINE'}
           </span>
@@ -50,9 +55,9 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
       <div className="flex-1 overflow-y-auto max-h-80 space-y-2 pr-1 custom-scrollbar">
         {events.length === 0 ? (
           <div className="h-40 flex flex-col items-center justify-center text-center p-4">
-            <Clock className="h-6 w-6 text-slate-600 mb-2" />
-            <p className="text-xs text-slate-400">Awaiting stream telemetry...</p>
-            <p className="text-[10px] text-slate-500 mt-1">
+            <Clock className="h-6 w-6 mb-2" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Awaiting stream telemetry...</p>
+            <p className="text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
               Connection events will appear here in real-time as processes open and close sockets.
             </p>
           </div>
@@ -64,7 +69,10 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
             return (
               <div
                 key={evt.id}
-                className="flex items-center justify-between p-2.5 rounded-lg bg-[#111827]/60 border border-[#2d3548]/80 hover:border-cyan-500/30 transition-all text-xs font-mono group"
+                className="flex items-center justify-between p-2.5 rounded-lg transition-all text-xs font-mono group"
+                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
@@ -83,21 +91,21 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
 
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-1.5 truncate">
-                      <span className="font-semibold text-slate-200 truncate">
+                      <span className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                         {evt.process_name}
                       </span>
                       {evt.pid && (
-                        <span className="text-[10px] text-slate-500 font-normal">
+                        <span className="text-[10px] font-normal" style={{ color: 'var(--text-muted)' }}>
                           PID:{evt.pid}
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-400 truncate">
+                    <span className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
                       {evt.protocol} &bull; {evt.local_address}{' '}
                       {evt.remote_address && evt.remote_address !== 'None' ? (
                         <>➔ {evt.remote_address}</>
                       ) : (
-                        <span className="text-cyan-400 font-sans">({evt.status})</span>
+                        <span className="font-sans" style={{ color: 'var(--accent)' }}>({evt.status})</span>
                       )}
                     </span>
                   </div>
@@ -113,7 +121,7 @@ export const LiveEventFeed: React.FC<LiveEventFeedProps> = ({
                   >
                     {evt.event_type}
                   </span>
-                  <span className="text-[9px] text-slate-500 mt-0.5">{timeStr}</span>
+                  <span className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{timeStr}</span>
                 </div>
               </div>
             );

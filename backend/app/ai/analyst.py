@@ -190,7 +190,8 @@ class AISecurityAnalyst:
 
     async def _call_gemini_analysis(self, req: AIThreatAnalysisRequest, api_key: str) -> AIThreatAnalysisResponse | None:
         """Call Google Gemini API for deep threat investigation."""
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        model_name = req.model or "gemini-1.5-flash"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         prompt = (
             f"You are a Senior SOC Incident Responder analyzing a network threat.\n"
             f"Incident: {req.title}\n"
@@ -224,13 +225,13 @@ class AISecurityAnalyst:
                         MitreTacticSchema(id="T1071", name="Application Layer Protocol", tactic="Command and Control"),
                         MitreTacticSchema(id="T1218", name="Signed Binary Proxy Execution", tactic="Defense Evasion"),
                     ],
-                    severity_assessment="HIGH - Generated via Google Gemini",
+                    severity_assessment=f"HIGH - Generated via Google Gemini ({model_name})",
                     root_cause_analysis=data.get("root_cause_analysis", "Analyzed by Gemini."),
                     potential_impact=data.get("potential_impact", "Potential unauthorized network communication."),
                     threat_actor_attribution=data.get("threat_actor_attribution", "Threat Actor Vector"),
                     containment_checklist=data.get("containment_checklist", ["Isolate endpoint", "Kill offending PID"]),
                     suggested_commands=data.get("suggested_commands", [f"Stop-Process -Id {req.pid or 1} -Force"]),
-                    provider="Google Gemini 1.5 Flash",
+                    provider=f"Google Gemini ({model_name})",
                     generated_at=self._now_iso(),
                 )
         return None
@@ -255,7 +256,8 @@ class AISecurityAnalyst:
         self, req: AIChatRequest, api_key: str, live_ctx: dict[str, Any]
     ) -> AIChatResponse | None:
         """Query Gemini API with live telemetry injection."""
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        model_name = req.model or "gemini-1.5-flash"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
 
         system_instruction = (
             "You are CyberWatch AI, an elite Senior Security Operations Center (SOC) Analyst and Threat Intelligence Expert. "
@@ -287,7 +289,7 @@ class AISecurityAnalyst:
                         "How can I investigate this PID further?",
                         "Generate an executive briefing on current posture.",
                     ],
-                    provider="Google Gemini 1.5 Flash",
+                    provider=f"Google Gemini ({model_name})",
                     timestamp=self._now_iso(),
                 )
         return None

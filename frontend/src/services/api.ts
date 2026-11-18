@@ -280,20 +280,26 @@ export const analyzeThreatWithAI = async (payload: {
   pid?: number;
   evidence?: Record<string, any>;
   api_key?: string;
+  model?: string;
 }): Promise<AIThreatAnalysis> => {
-  const response = await api.post<AIThreatAnalysis>('/ai/analyze', payload);
+  const response = await api.post<AIThreatAnalysis>('/ai/analyze', {
+    ...payload,
+    model: payload.model || localStorage.getItem('cyberwatch_gemini_model') || 'gemini-1.5-flash',
+  });
   return response.data;
 };
 
 export const chatWithAIAnalyst = async (
   message: string,
   history: AIChatMessage[] = [],
-  apiKey?: string
+  apiKey?: string,
+  model?: string
 ): Promise<AIChatResponse> => {
   const response = await api.post<AIChatResponse>('/ai/chat', {
     message,
     history,
     api_key: apiKey || localStorage.getItem('cyberwatch_gemini_key') || undefined,
+    model: model || localStorage.getItem('cyberwatch_gemini_model') || 'gemini-1.5-flash',
   });
   return response.data;
 };

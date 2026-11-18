@@ -66,24 +66,28 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
       <div
-        className="bg-[#0f172a] border border-[#334155] rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#1e293b] flex items-center justify-between bg-[#111c33]/70">
+        <div
+          className="px-6 py-4 flex items-center justify-between"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+        >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-slate-400">{alert.id}</span>
-                <span className="text-slate-600">•</span>
-                <span className="font-mono text-xs text-slate-400">
+                <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{alert.id}</span>
+                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {new Date(alert.created_at).toLocaleTimeString()}
                 </span>
               </div>
-              <h2 className="text-base font-semibold text-slate-100 mt-0.5">{alert.title}</h2>
+              <h2 className="text-base font-semibold mt-0.5" style={{ color: 'var(--text-primary)' }}>{alert.title}</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -91,7 +95,16 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
             <AlertStatusBadge status={alert.status} size="sm" />
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition ml-2"
+              className="p-1.5 rounded-lg transition ml-2"
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card-hover)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              }}
             >
               <X className="w-5 h-5" />
             </button>
@@ -101,9 +114,12 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
           {/* Action Ribbon: Triage Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#131d33] border border-[#223254] rounded-lg">
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+          >
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-mono text-[11px] uppercase">Incident State:</span>
+              <span className="font-mono text-[11px] uppercase" style={{ color: 'var(--text-secondary)' }}>Incident State:</span>
               {alert.status !== 'acknowledged' && alert.status !== 'resolved' && (
                 <button
                   disabled={isSubmitting}
@@ -135,7 +151,14 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
                   onClose();
                   onOpenAIInvestigate(alert);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded text-xs font-mono font-medium shadow-[0_0_12px_rgba(6,182,212,0.3)] transition"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-mono font-medium transition"
+                style={{
+                  background: 'var(--accent)',
+                  color: '#000',
+                  boxShadow: 'var(--accent-glow)',
+                }}
+                onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.85')}
+                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Analyze with AI</span>
@@ -144,26 +167,29 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
           </div>
 
           {/* Context Details */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[#131d33] border border-[#223254] rounded-lg p-3">
+          <div
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 rounded-lg p-3"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+          >
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-mono">Assigned To</span>
-              <p className="font-mono text-slate-200 mt-1 flex items-center gap-1">
-                <User className="w-3 h-3 text-cyan-400" />
+              <span className="text-[10px] uppercase font-mono" style={{ color: 'var(--text-secondary)' }}>Assigned To</span>
+              <p className="font-mono mt-1 flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                <User className="w-3 h-3" style={{ color: 'var(--accent)' }} />
                 {alert.assigned_to}
               </p>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-mono">Process (PID)</span>
-              <p className="font-mono text-slate-200 mt-1 truncate">
+              <span className="text-[10px] uppercase font-mono" style={{ color: 'var(--text-secondary)' }}>Process (PID)</span>
+              <p className="font-mono mt-1 truncate" style={{ color: 'var(--text-primary)' }}>
                 {alert.process_name || 'System'}{' '}
-                {alert.pid ? <span className="text-slate-500">({alert.pid})</span> : ''}
+                {alert.pid ? <span style={{ color: 'var(--text-muted)' }}>({alert.pid})</span> : ''}
               </p>
             </div>
             <div className="col-span-2">
-              <span className="text-[10px] text-slate-400 uppercase font-mono">Network Path</span>
-              <p className="font-mono text-slate-200 mt-1 flex items-center gap-1 truncate">
+              <span className="text-[10px] uppercase font-mono" style={{ color: 'var(--text-secondary)' }}>Network Path</span>
+              <p className="font-mono mt-1 flex items-center gap-1 truncate" style={{ color: 'var(--text-primary)' }}>
                 <span>{alert.source_ip || '*'}:{alert.source_port || '*'}</span>
-                <ArrowRight className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                <ArrowRight className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--accent)' }} />
                 <span className="text-rose-300 font-bold">{alert.dest_ip || '*'}:{alert.dest_port || '*'}</span>
               </p>
             </div>
@@ -171,10 +197,13 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
 
           {/* Incident Description */}
           <div>
-            <span className="text-[11px] font-mono uppercase text-slate-400 block mb-1.5">
+            <span className="text-[11px] font-mono uppercase block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
               Incident Narrative
             </span>
-            <div className="p-3 bg-[#131d33] border border-[#223254] rounded-lg text-slate-300 leading-relaxed text-xs">
+            <div
+              className="p-3 rounded-lg leading-relaxed text-xs"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+            >
               {alert.description}
             </div>
           </div>
@@ -182,16 +211,17 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
           {/* Remediation Recommendations */}
           {alert.recommendations && alert.recommendations.length > 0 && (
             <div>
-              <span className="text-[11px] font-mono uppercase text-slate-400 block mb-1.5">
+              <span className="text-[11px] font-mono uppercase block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Containment Checklist
               </span>
               <div className="space-y-1.5">
                 {alert.recommendations.map((step, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 p-2 bg-[#131d33] border border-[#223254] rounded text-slate-300 text-xs"
+                    className="flex items-center gap-2 p-2 rounded text-xs"
+                    style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--accent)' }} />
                     <span>{step}</span>
                   </div>
                 ))}
@@ -201,21 +231,22 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
 
           {/* Analyst Notes Log */}
           <div>
-            <span className="text-[11px] font-mono uppercase text-slate-400 block mb-1.5 flex items-center gap-1">
-              <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[11px] font-mono uppercase block mb-1.5 flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+              <MessageSquare className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
               Triage Investigation Notes ({alert.notes.length})
             </span>
             <div className="space-y-2 max-h-36 overflow-y-auto mb-2">
               {alert.notes.map((note) => (
                 <div
                   key={note.id}
-                  className="p-2.5 bg-[#0a0e17] border border-[#1b2640] rounded text-xs space-y-1 font-mono"
+                  className="p-2.5 rounded text-xs space-y-1 font-mono"
+                  style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
                 >
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="text-cyan-400 font-bold">{note.author}</span>
+                  <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                    <span className="font-bold" style={{ color: 'var(--accent)' }}>{note.author}</span>
                     <span>{new Date(note.timestamp).toLocaleTimeString()}</span>
                   </div>
-                  <p className="text-slate-300">{note.content}</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>{note.content}</p>
                 </div>
               ))}
             </div>
@@ -227,12 +258,22 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
                 placeholder="Add analyst investigation note..."
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
-                className="flex-1 bg-[#131d33] border border-[#223254] rounded px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                className="flex-1 rounded px-3 py-1.5 text-xs placeholder-slate-500 focus:outline-none font-mono"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
               />
               <button
                 type="submit"
                 disabled={isSubmitting || !newNote.trim()}
-                className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded font-mono text-xs disabled:opacity-40 flex items-center gap-1 transition"
+                className="px-3 py-1.5 rounded font-mono text-xs disabled:opacity-40 flex items-center gap-1 transition"
+                style={{ background: 'var(--accent)', color: '#000', fontWeight: 600 }}
+                onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.85')}
+                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
               >
                 <Send className="w-3 h-3" />
                 <span>Post</span>
@@ -242,10 +283,22 @@ export const IncidentTriageModal: React.FC<IncidentTriageModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-[#1e293b] flex justify-end bg-[#111c33]/70">
+        <div
+          className="px-6 py-3 flex justify-end"
+          style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}
+        >
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-mono transition"
+            className="px-4 py-1.5 rounded-lg text-xs font-mono transition"
+            style={{ background: 'var(--bg-card-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card-hover)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+            }}
           >
             Close
           </button>

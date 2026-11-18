@@ -45,13 +45,19 @@ export const Processes: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#2d3548]">
+      <div
+        className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <div>
-          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
-            <Cpu className="h-5 w-5 text-cyan-400" />
+          <h1
+            className="text-xl font-bold flex items-center gap-2.5"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Cpu className="h-5 w-5" style={{ color: 'var(--accent)' }} />
             Active Process Telemetry
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
             Real-time process inspection and socket mapping to identify suspicious background daemons.
           </p>
         </div>
@@ -60,16 +66,16 @@ export const Processes: React.FC = () => {
           {/* Auto refresh toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+            style={
               autoRefresh
-                ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-400'
-                : 'bg-[#1e2538] border-[#2d3548] text-slate-400'
-            }`}
+                ? { background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)' }
+                : { background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }
+            }
           >
             <CheckCircle2
-              className={`h-3.5 w-3.5 ${
-                autoRefresh ? 'text-cyan-400' : 'text-slate-500'
-              }`}
+              className="h-3.5 w-3.5"
+              style={{ color: autoRefresh ? 'var(--accent)' : 'var(--text-muted)' }}
             />
             Auto-refresh (5s)
           </button>
@@ -77,7 +83,12 @@ export const Processes: React.FC = () => {
           {/* Manual refresh button */}
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1e2538] border border-[#2d3548] text-xs font-medium text-slate-300 hover:text-white hover:border-cyan-500/50 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
@@ -86,37 +97,62 @@ export const Processes: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-[#1e2538] border border-[#2d3548] rounded-xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div
+        className="rounded-xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4" style={{ color: 'var(--text-secondary)' }} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Filter by process name or PID..."
-            className="w-full bg-[#111827] border border-[#2d3548] rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 transition-all font-mono"
+            className="w-full pl-9 pr-4 py-2 rounded-lg text-xs placeholder-slate-500 focus:outline-none transition-all font-mono"
+            style={{
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            }}
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Socket filter toggle */}
-          <label className="flex items-center gap-2 cursor-pointer bg-[#111827] px-3 py-2 rounded-lg border border-[#2d3548] text-xs text-slate-300 select-none hover:border-[#3d4558]">
+          <label
+            className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg text-xs select-none"
+            style={{
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
+          >
             <input
               type="checkbox"
               checked={onlyWithSockets}
               onChange={(e) => setOnlyWithSockets(e.target.checked)}
-              className="rounded bg-[#1e2538] border-[#2d3548] text-cyan-500 focus:ring-0 focus:ring-offset-0"
+              className="rounded focus:ring-0 focus:ring-offset-0"
+              style={{ accentColor: 'var(--accent)' }}
             />
-            <Network className="h-3.5 w-3.5 text-cyan-400" />
+            <Network className="h-3.5 w-3.5" style={{ color: 'var(--accent)' }} />
             <span>Only with open sockets</span>
           </label>
 
           {/* Process Count Badge */}
-          <div className="px-3 py-2 rounded-lg bg-[#111827] border border-[#2d3548] text-xs font-mono text-slate-300 flex items-center gap-1.5">
-            <Filter className="h-3.5 w-3.5 text-slate-500" />
+          <div
+            className="px-3 py-2 rounded-lg text-xs font-mono flex items-center gap-1.5"
+            style={{
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <Filter className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} />
             <span>
-              Showing <strong className="text-cyan-400">{filteredProcesses.length}</strong> / {totalCount}
+              Showing{' '}
+              <strong style={{ color: 'var(--accent)' }}>{filteredProcesses.length}</strong>{' '}
+              / {totalCount}
             </span>
           </div>
         </div>

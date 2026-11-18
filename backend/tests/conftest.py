@@ -130,11 +130,12 @@ def mock_psutil_connections(monkeypatch: pytest.MonkeyPatch) -> list[MockConn]:
     class MockProcess:
         def __init__(self, pid: int = 1):
             self.pid = pid
+            self.info = {"pid": pid, "name": "python.exe", "status": "running"}
         def name(self) -> str:
             return "python.exe"
-        def cpu_percent(self) -> float:
+        def cpu_percent(self, *args, **kwargs) -> float:
             return 1.2
-        def memory_percent(self) -> float:
+        def memory_percent(self, *args, **kwargs) -> float:
             return 2.5
         def memory_info(self):
             info = namedtuple("pmem", ["rss", "vms"])
@@ -150,8 +151,17 @@ def mock_psutil_connections(monkeypatch: pytest.MonkeyPatch) -> list[MockConn]:
         def net_connections(self, kind: str = "all") -> list[MockConn]:
             return mock_conns
 
+    def _mock_process(pid: int = 1):
+        if pid == 999999999:
+            raise psutil.NoSuchProcess(pid)
+        return MockProcess(pid)
+
+    def _mock_process_iter(attrs=None):
+        return [MockProcess(1234), MockProcess(5678)]
+
     monkeypatch.setattr(psutil, "net_connections", _mock_net_connections)
-    monkeypatch.setattr(psutil, "Process", MockProcess)
+    monkeypatch.setattr(psutil, "Process", _mock_process)
+    monkeypatch.setattr(psutil, "process_iter", _mock_process_iter)
     return mock_conns
 
 

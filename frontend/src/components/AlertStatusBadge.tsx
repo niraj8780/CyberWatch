@@ -14,6 +14,7 @@ export const AlertStatusBadge: React.FC<AlertStatusBadgeProps> = ({
   const norm = (status || 'new').toLowerCase();
 
   let styles = 'bg-rose-500/15 text-rose-400 border-rose-500/40';
+  let inlineStyle: React.CSSProperties = {};
   let Icon = AlertCircle;
   let label = 'NEW';
   let dotPulse = 'animate-ping';
@@ -35,6 +36,7 @@ export const AlertStatusBadge: React.FC<AlertStatusBadgeProps> = ({
   return (
     <span
       className={`inline-flex items-center font-mono font-medium rounded-md border tracking-wider select-none ${styles} ${sizeClass}`}
+      style={Object.keys(inlineStyle).length > 0 ? inlineStyle : undefined}
     >
       <span className="relative flex h-2 w-2">
         {dotPulse && (
